@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sign-language-translator"
+version = "0.1.0"
+description = "Real-time sign language translator using a replaceable CNN predictor."
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=1.26,<3.0",
+    "opencv-python>=4.10,<5.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0,<10.0",
+    "ruff>=0.12,<1.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
