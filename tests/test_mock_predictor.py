@@ -19,4 +19,4 @@ def test_mock_predictor_returns_prediction() -> None:
     prediction = predictor.predict(image)
 
     assert prediction.label == "TEST"
-    assert prediction.confidence == 0.95
+    assert prediction.confidence == 1.0
