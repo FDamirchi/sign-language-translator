@@ -20,11 +20,9 @@ class RoiConfig:
 @dataclass(frozen=True, slots=True)
 class AppConfig:
     window_title: str = "Sign-Language Translator"
-    predictior_backend: str = "mock" # TODO: Change to the main model later
+    predictior_backend: str = "mock"  # TODO: Change to the main model later
 
     quit_keys: tuple[int, ...] = (ord("q"), 27)
 
     camera: CameraConfig = field(default_factory=CameraConfig)
     roi: RoiConfig = field(default_factory=RoiConfig)
-
-
