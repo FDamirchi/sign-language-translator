@@ -27,7 +27,7 @@ def resolve_roi(
     y1 = int(frame_height * config.y_ratio)
 
     x2 = int(frame_width * (config.x_ratio + config.width_ratio))
-    y2 = int(frame_height * (config.y_ratio + config.height_ratio)) # type: ignore
+    y2 = int(frame_height * (config.y_ratio + config.height_ratio))
 
     x1 = max(0, min(x1, frame_width - 1))
     y1 = max(0, min(y1, frame_height - 1))

@@ -8,7 +8,7 @@ from sign_translator.contracts import Prediction
 
 
 @dataclass(slots=True)
-class TimedMockPredator:
+class TimedMockPredictor:
     labels: tuple[str, ...] = (
         "A",
         "B",

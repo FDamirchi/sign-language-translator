@@ -14,13 +14,13 @@ class RoiConfig:
     x_ratio: float = 0.55
     y_ratio: float = 0.12
     width_ratio: float = 0.38
-    height: float = 0.72
+    height_ratio: float = 0.72
 
 
 @dataclass(frozen=True, slots=True)
 class AppConfig:
     window_title: str = "Sign-Language Translator"
-    predictior_backend: str = "mock"  # TODO: Change to the main model later
+    predictor_backend: str = "mock"  # TODO: Change to the main model later
 
     quit_keys: tuple[int, ...] = (ord("q"), 27)
 

@@ -10,7 +10,7 @@ from sign_translator.vision.roi import crop_roi, resolve_roi
 def run(config: AppConfig | None = None) -> None:
     app_config = config or AppConfig()
 
-    predictor = create_predictor(app_config.predictor_backend) # type: ignore
+    predictor = create_predictor(app_config.predictor_backend)
 
     try:
         with Camera(app_config.camera) as camera:
