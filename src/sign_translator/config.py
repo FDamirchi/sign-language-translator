@@ -18,6 +18,14 @@ class RoiConfig:
 
 
 @dataclass(frozen=True, slots=True)
+class DecoderConfig:
+    min_confidence: float = 0.51
+    hold_seconds: float = 2.0
+    release_seconds: float = 0.4
+    nuetral_labels: tuple[str, ...] = ("BACKGROUND",)
+
+
+@dataclass(frozen=True, slots=True)
 class AppConfig:
     window_title: str = "Sign-Language Translator"
     predictor_backend: str = "mock"  # TODO: Change to the main model later
@@ -26,3 +34,4 @@ class AppConfig:
 
     camera: CameraConfig = field(default_factory=CameraConfig)
     roi: RoiConfig = field(default_factory=RoiConfig)
+    decoder: DecoderConfig = field(default_factory=DecoderConfig)
