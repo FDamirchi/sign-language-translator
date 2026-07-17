@@ -20,7 +20,7 @@ class TemporalDecoder:
         min_confidence: float = 0.51,
         hold_seconds: float = 2.0,
         release_seconds: float = 0.4,
-        nuetral_labels: tuple[str, ...] = ("BACKGROUND",),
+        neutral_labels: tuple[str, ...] = ("BACKGROUND",),
     ) -> None:
         if not 0.0 <= min_confidence <= 1.0:
             raise ValueError("min_confidence must be between 0.0 and 1.0!")
@@ -34,7 +34,7 @@ class TemporalDecoder:
         self._min_confidence = min_confidence
         self._hold_seconds = hold_seconds
         self._release_seconds = release_seconds
-        self._nuetral_labels = frozenset(nuetral_labels)
+        self._neutral_labels = frozenset(neutral_labels)
 
         self._candidate_label: str | None = None
         self._candidate_since: float | None = None
@@ -55,13 +55,13 @@ class TemporalDecoder:
 
         label = prediction.label.strip()
 
-        is_nuetral = (
+        is_neutral = (
             prediction.confidence < self._min_confidence
-            or label in self._nuetral_labels
+            or label in self._neutral_labels
         )
 
-        if is_nuetral:
-            return self._handle_nuetral(timestamp)
+        if is_neutral:
+            return self._handle_neutral(timestamp)
 
         return self._handle_sign(label, timestamp)
 
@@ -72,7 +72,7 @@ class TemporalDecoder:
         self._release_since = None
         self._last_timestamp = None
 
-    def _handle_nuetral(self, timestamp: float) -> DecoderUpdate:
+    def _handle_neutral(self, timestamp: float) -> DecoderUpdate:
         self._candidate_label = None
         self._candidate_since = None
 

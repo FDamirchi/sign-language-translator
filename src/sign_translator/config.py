@@ -22,7 +22,7 @@ class DecoderConfig:
     min_confidence: float = 0.51
     hold_seconds: float = 2.0
     release_seconds: float = 0.4
-    nuetral_labels: tuple[str, ...] = ("BACKGROUND",)
+    neutral_labels: tuple[str, ...] = ("BACKGROUND",)
 
 
 @dataclass(frozen=True, slots=True)
