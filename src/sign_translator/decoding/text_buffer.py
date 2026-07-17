@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 
 @dataclass(slots=True)
 class TextBuffer:
-    separator: str = " "
+    separator: str = ""
     _tokens: list[str] = field(default_factory=list) # type: ignore
 
     @property
@@ -11,7 +11,7 @@ class TextBuffer:
         return self.separator.join(self._tokens)
 
     def append(self, token: str) -> None:
-        normalized_token = token.strip()
+        normalized_token = token.strip().upper()
 
         if not normalized_token:
             raise ValueError("Cannot append an empty token")
@@ -21,7 +21,7 @@ class TextBuffer:
     def backspace(self) -> str | None:
         if not self._tokens:
             return None
-        
+
         return self._tokens.pop()
 
     def clear(self) -> None:
@@ -29,3 +29,6 @@ class TextBuffer:
 
     def __len__(self) -> int:
         return len(self._tokens)
+
+    def __bool__(self) -> bool:
+        return bool(self._tokens)
