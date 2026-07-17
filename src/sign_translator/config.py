@@ -26,6 +26,19 @@ class DecoderConfig:
 
 
 @dataclass(frozen=True, slots=True)
+class FinalizationConfig:
+    min_confidence: float = 0.80
+    background_seconds: float = 5.0
+    background_labels: tuple[str, ...] = ("BACKGROUND",)
+
+
+@dataclass(frozen=True, slots=True)
+class SpeechConfig:
+    backend: str = "noop" # TODO: Change to pyttsx3 later
+    lowercase_before_speaking: bool = True
+
+
+@dataclass(frozen=True, slots=True)
 class AppConfig:
     window_title: str = "Sign-Language Translator"
     predictor_backend: str = "mock"  # TODO: Change to the main model later
@@ -35,3 +48,5 @@ class AppConfig:
     camera: CameraConfig = field(default_factory=CameraConfig)
     roi: RoiConfig = field(default_factory=RoiConfig)
     decoder: DecoderConfig = field(default_factory=DecoderConfig)
+    finalization: FinalizationConfig = field(default_factory=FinalizationConfig)
+    speech: SpeechConfig = field(default_factory=SpeechConfig)
