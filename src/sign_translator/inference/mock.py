@@ -16,7 +16,7 @@ class TimedMockPredictor:
         "BACKGROUND",
     )
 
-    seconds_per_label: float = 2.0
+    seconds_per_label: float = 3.0
     _started_at: float = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
