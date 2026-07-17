@@ -39,7 +39,7 @@ def run(config: AppConfig | None = None) -> None:
                 )
 
                 roi_image = crop_roi(
-                    frame, # type: ignore
+                    frame,  # type: ignore
                     roi_box,
                 )
 
@@ -57,7 +57,7 @@ def run(config: AppConfig | None = None) -> None:
                     )
 
                 draw_overlay(
-                    frame, # type: ignore
+                    frame,  # type: ignore
                     roi_box,
                     prediction,
                     decoder_update,
