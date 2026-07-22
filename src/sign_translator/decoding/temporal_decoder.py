@@ -143,6 +143,6 @@ class TemporalDecoder:
         timestamp: float,
     ) -> None:
         if self._last_timestamp is not None and timestamp < self._last_timestamp:
-            raise ValueError("Timestamps must be monotonically " "increasing")
+            raise ValueError("Timestamps must be monotonically increasing!")
 
         self._last_timestamp = timestamp
