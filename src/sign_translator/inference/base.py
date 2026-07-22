@@ -11,5 +11,8 @@ class Predictor(Protocol):
         self,
         image: NDArray[np.uint8],
     ) -> Prediction:
-        """Return one label and a normalized confidense score."""
+        """
+        Return one canonical label and a normalized
+        confidence score.
+        """
         ...
