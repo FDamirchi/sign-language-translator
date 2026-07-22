@@ -49,5 +49,5 @@ class TimedMockPredictor:
 
         return Prediction(
             label=self.labels[index],
-            confidence=0.95,
+            confidence=1.0,
         )
