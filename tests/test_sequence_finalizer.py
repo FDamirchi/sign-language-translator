@@ -1,4 +1,6 @@
-from sign_translator.contracts import Prediction
+from sign_translator.contracts import (
+    Prediction,
+)
 from sign_translator.decoding.sequence_finalizer import (
     SequenceFinalizer,
 )
@@ -14,19 +16,19 @@ def make_prediction(
     )
 
 
-def test_finalizes_after_background_duration() -> None:
+def test_finalizes_after_nothing_duration() -> None:
     finalizer = SequenceFinalizer(
-        background_seconds=5.0,
+        inactivity_seconds=5.0,
     )
 
     first = finalizer.update(
-        make_prediction("BACKGROUND"),
+        make_prediction("nothing"),
         has_content=True,
         now=10.0,
     )
 
     completed = finalizer.update(
-        make_prediction("BACKGROUND"),
+        make_prediction("NOTHING"),
         has_content=True,
         now=15.0,
     )
@@ -36,25 +38,25 @@ def test_finalizes_after_background_duration() -> None:
     assert completed.progress == 1.0
 
 
-def test_does_not_finalize_twice_during_same_background() -> None:
+def test_does_not_finalize_twice_during_same_nothing_period() -> None:
     finalizer = SequenceFinalizer(
-        background_seconds=5.0,
+        inactivity_seconds=5.0,
     )
 
     finalizer.update(
-        make_prediction("BACKGROUND"),
+        make_prediction("NOTHING"),
         has_content=True,
         now=0.0,
     )
 
     first = finalizer.update(
-        make_prediction("BACKGROUND"),
+        make_prediction("NOTHING"),
         has_content=True,
         now=5.0,
     )
 
     repeated = finalizer.update(
-        make_prediction("BACKGROUND"),
+        make_prediction("NOTHING"),
         has_content=False,
         now=8.0,
     )
@@ -63,13 +65,13 @@ def test_does_not_finalize_twice_during_same_background() -> None:
     assert repeated.finalized is False
 
 
-def test_non_background_resets_timer() -> None:
+def test_non_neutral_label_resets_timer() -> None:
     finalizer = SequenceFinalizer(
-        background_seconds=5.0,
+        inactivity_seconds=5.0,
     )
 
     finalizer.update(
-        make_prediction("BACKGROUND"),
+        make_prediction("NOTHING"),
         has_content=True,
         now=0.0,
     )
@@ -81,13 +83,13 @@ def test_non_background_resets_timer() -> None:
     )
 
     restarted = finalizer.update(
-        make_prediction("BACKGROUND"),
+        make_prediction("NOTHING"),
         has_content=True,
         now=4.0,
     )
 
     not_completed = finalizer.update(
-        make_prediction("BACKGROUND"),
+        make_prediction("NOTHING"),
         has_content=True,
         now=7.0,
     )
@@ -96,39 +98,39 @@ def test_non_background_resets_timer() -> None:
     assert not_completed.finalized is False
 
 
-def test_low_confidence_background_does_not_count() -> None:
+def test_low_confidence_nothing_does_not_count() -> None:
     finalizer = SequenceFinalizer(
         min_confidence=0.80,
-        background_seconds=5.0,
+        inactivity_seconds=5.0,
     )
 
     update = finalizer.update(
         make_prediction(
-            "BACKGROUND",
+            "NOTHING",
             confidence=0.40,
         ),
         has_content=True,
         now=0.0,
     )
 
-    assert update.background_active is False
+    assert update.neutral_active is False
     assert update.progress == 0.0
     assert update.finalized is False
 
 
 def test_empty_buffer_is_not_finalized() -> None:
     finalizer = SequenceFinalizer(
-        background_seconds=5.0,
+        inactivity_seconds=5.0,
     )
 
     finalizer.update(
-        make_prediction("BACKGROUND"),
+        make_prediction("NOTHING"),
         has_content=False,
         now=0.0,
     )
 
     update = finalizer.update(
-        make_prediction("BACKGROUND"),
+        make_prediction("NOTHING"),
         has_content=False,
         now=10.0,
     )

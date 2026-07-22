@@ -7,7 +7,7 @@ from sign_translator.vision.roi import (
 )
 
 
-def test_resolve_and_crop_roi() -> None:
+def test_resolve_and_crop_non_square_roi() -> None:
     frame = np.zeros(
         (100, 200, 3),
         dtype=np.uint8,
@@ -18,14 +18,35 @@ def test_resolve_and_crop_roi() -> None:
         y_ratio=0.1,
         width_ratio=0.4,
         height_ratio=0.8,
+        square=False,
     )
 
-    box = resolve_roi(frame, config)
-    roi = crop_roi(frame, box)
+    box = resolve_roi(
+        frame,
+        config,
+    )
+
+    roi = crop_roi(
+        frame,
+        box,
+    )
 
     assert box.x1 == 100
     assert box.y1 == 10
     assert box.x2 == 180
     assert box.y2 == 90
-
     assert roi.shape == (80, 80, 3)
+
+
+def test_square_roi_preserves_model_aspect_ratio() -> None:
+    frame = np.zeros(
+        (720, 1280, 3),
+        dtype=np.uint8,
+    )
+
+    box = resolve_roi(
+        frame,
+        RoiConfig(),
+    )
+
+    assert box.width == box.height

@@ -1,5 +1,9 @@
-from sign_translator.contracts import Prediction
-from sign_translator.decoding.temporal_decoder import TemporalDecoder
+from sign_translator.contracts import (
+    Prediction,
+)
+from sign_translator.decoding.temporal_decoder import (
+    TemporalDecoder,
+)
 
 
 def make_prediction(
@@ -18,7 +22,7 @@ def test_accepts_label_after_hold_duration() -> None:
     )
 
     first = decoder.update(
-        make_prediction("A"),
+        make_prediction("a"),
         now=0.0,
     )
 
@@ -57,7 +61,7 @@ def test_does_not_repeat_held_label() -> None:
     assert repeated.is_locked is True
 
 
-def test_background_releases_previous_label() -> None:
+def test_nothing_releases_previous_label() -> None:
     decoder = TemporalDecoder(
         hold_seconds=2.0,
         release_seconds=0.4,
@@ -74,12 +78,12 @@ def test_background_releases_previous_label() -> None:
     )
 
     decoder.update(
-        make_prediction("BACKGROUND"),
+        make_prediction("nothing"),
         now=2.1,
     )
 
     released = decoder.update(
-        make_prediction("BACKGROUND"),
+        make_prediction("NOTHING"),
         now=2.6,
     )
 
