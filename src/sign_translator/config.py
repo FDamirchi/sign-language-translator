@@ -1,5 +1,7 @@
 from dataclasses import dataclass, field
 
+from sign_translator.labels import NOTHING_LABEL
+
 
 @dataclass(frozen=True, slots=True)
 class CameraConfig:
@@ -15,6 +17,16 @@ class RoiConfig:
     y_ratio: float = 0.12
     width_ratio: float = 0.38
     height_ratio: float = 0.72
+    square: bool = True
+
+
+@dataclass(frozen=True, slots=True)
+class ModelInputConfig:
+    width: int = 200
+    height: int = 200
+    channels: int = 3
+    color_space: str = "RGB"
+    normalize_to_unit_interval: bool = True
 
 
 @dataclass(frozen=True, slots=True)
@@ -22,19 +34,19 @@ class DecoderConfig:
     min_confidence: float = 0.51
     hold_seconds: float = 2.0
     release_seconds: float = 0.4
-    neutral_labels: tuple[str, ...] = ("BACKGROUND",)
+    neutral_labels: tuple[str, ...] = (NOTHING_LABEL,)
 
 
 @dataclass(frozen=True, slots=True)
 class FinalizationConfig:
     min_confidence: float = 0.80
-    background_seconds: float = 5.0
-    background_labels: tuple[str, ...] = ("BACKGROUND",)
+    inactivity_seconds: float = 5.0
+    neutral_labels: tuple[str, ...] = (NOTHING_LABEL,)
 
 
 @dataclass(frozen=True, slots=True)
 class SpeechConfig:
-    backend: str = "noop" # TODO: Change to pyttsx3 later
+    backend: str = "noop"  # TODO: Change to pyttsx3 later
     lowercase_before_speaking: bool = True
 
 
@@ -47,6 +59,7 @@ class AppConfig:
 
     camera: CameraConfig = field(default_factory=CameraConfig)
     roi: RoiConfig = field(default_factory=RoiConfig)
+    model_input: ModelInputConfig = field(default_factory=ModelInputConfig)
     decoder: DecoderConfig = field(default_factory=DecoderConfig)
     finalization: FinalizationConfig = field(default_factory=FinalizationConfig)
     speech: SpeechConfig = field(default_factory=SpeechConfig)
