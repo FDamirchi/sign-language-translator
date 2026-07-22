@@ -3,6 +3,7 @@ from time import monotonic
 import cv2
 
 from sign_translator.config import AppConfig
+from sign_translator.decoding.label_handler import handle_accepted_label
 from sign_translator.decoding.sequence_finalizer import SequenceFinalizer
 from sign_translator.decoding.temporal_decoder import TemporalDecoder
 from sign_translator.decoding.text_buffer import TextBuffer
@@ -21,19 +22,19 @@ def run(config: AppConfig | None = None) -> None:
     )
 
     decoder = TemporalDecoder(
-        min_confidence=app_config.decoder.min_confidence,
-        hold_seconds=app_config.decoder.hold_seconds,
-        release_seconds=app_config.decoder.release_seconds,
-        neutral_labels=app_config.decoder.neutral_labels,
+        min_confidence=(app_config.decoder.min_confidence),
+        hold_seconds=(app_config.decoder.hold_seconds),
+        release_seconds=(app_config.decoder.release_seconds),
+        neutral_labels=(app_config.decoder.neutral_labels),
     )
 
     finalizer = SequenceFinalizer(
         min_confidence=(app_config.finalization.min_confidence),
-        background_seconds=(app_config.finalization.background_seconds),
-        background_labels=(app_config.finalization.background_labels),
+        inactivity_seconds=(app_config.finalization.inactivity_seconds),
+        neutral_labels=(app_config.finalization.neutral_labels),
     )
 
-    text_buffer = TextBuffer(separator="")
+    text_buffer = TextBuffer()
     last_finalized_text = ""
 
     speech_engine = create_speech_engine(
@@ -46,15 +47,18 @@ def run(config: AppConfig | None = None) -> None:
                 frame = camera.read()
 
                 if app_config.camera.mirror:
-                    frame = cv2.flip(frame, 1)
+                    frame = cv2.flip(
+                        frame,
+                        1,
+                    )
 
                 roi_box = resolve_roi(
-                    frame,  # type: ignore
+                    frame, # type: ignore
                     app_config.roi,
                 )
 
                 roi_image = crop_roi(
-                    frame,  # type: ignore
+                    frame, # type: ignore
                     roi_box,
                 )
 
@@ -70,8 +74,9 @@ def run(config: AppConfig | None = None) -> None:
                 )
 
                 if decoder_update.accepted_label is not None:
-                    text_buffer.append(
+                    handle_accepted_label(
                         decoder_update.accepted_label,
+                        text_buffer,
                     )
 
                 finalization_update = finalizer.update(
@@ -81,18 +86,22 @@ def run(config: AppConfig | None = None) -> None:
                 )
 
                 if finalization_update.finalized:
-                    last_finalized_text = text_buffer.text
+                    finalized_text = text_buffer.finalized_text
 
-                    speech_text = last_finalized_text
+                    if finalized_text:
+                        last_finalized_text = finalized_text
 
-                    if app_config.speech.lowercase_before_speaking:
-                        speech_text = speech_text.lower()
+                        speech_text = finalized_text
 
-                    speech_engine.speak(speech_text)
+                        if app_config.speech.lowercase_before_speaking:
+                            speech_text = speech_text.lower()
+
+                        speech_engine.speak(speech_text)
+
                     text_buffer.clear()
 
                 draw_overlay(
-                    frame,  # type: ignore
+                    frame, # type: ignore
                     roi_box,
                     prediction,
                     decoder_update,
