@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
+from pathlib import Path
 
-from sign_translator.labels import NOTHING_LABEL
+from sign_translator.labels import MODEL_OUTPUT_LABELS, NOTHING_LABEL
 
 
 @dataclass(frozen=True, slots=True)
@@ -30,10 +31,20 @@ class ModelInputConfig:
 
 
 @dataclass(frozen=True, slots=True)
+class KerasPredictorConfig:
+    model_path: Path = Path("models/asl_model.keras")
+
+    output_mode: str = "auto"
+
+    labels: tuple[str, ...] = MODEL_OUTPUT_LABELS
+
+
+@dataclass(frozen=True, slots=True)
 class DecoderConfig:
     min_confidence: float = 0.51
     hold_seconds: float = 2.0
     release_seconds: float = 0.4
+
     neutral_labels: tuple[str, ...] = (NOTHING_LABEL,)
 
 
@@ -41,6 +52,7 @@ class DecoderConfig:
 class FinalizationConfig:
     min_confidence: float = 0.80
     inactivity_seconds: float = 5.0
+
     neutral_labels: tuple[str, ...] = (NOTHING_LABEL,)
 
 
@@ -60,6 +72,7 @@ class AppConfig:
     camera: CameraConfig = field(default_factory=CameraConfig)
     roi: RoiConfig = field(default_factory=RoiConfig)
     model_input: ModelInputConfig = field(default_factory=ModelInputConfig)
+    keras: KerasPredictorConfig = field(default_factory=KerasPredictorConfig)
     decoder: DecoderConfig = field(default_factory=DecoderConfig)
     finalization: FinalizationConfig = field(default_factory=FinalizationConfig)
     speech: SpeechConfig = field(default_factory=SpeechConfig)
