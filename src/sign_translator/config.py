@@ -46,7 +46,7 @@ class FinalizationConfig:
 
 @dataclass(frozen=True, slots=True)
 class SpeechConfig:
-    backend: str = "noop"  # TODO: Change to pyttsx3 later
+    backend: str = "pyttsx3"
     lowercase_before_speaking: bool = True
 
 
