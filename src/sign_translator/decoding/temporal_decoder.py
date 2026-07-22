@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from time import monotonic
 
 from sign_translator.contracts import Prediction
+from sign_translator.labels import NOTHING_LABEL, normalize_label
 
 
 @dataclass(frozen=True, slots=True)
@@ -20,7 +21,7 @@ class TemporalDecoder:
         min_confidence: float = 0.51,
         hold_seconds: float = 2.0,
         release_seconds: float = 0.4,
-        neutral_labels: tuple[str, ...] = ("BACKGROUND",),
+        neutral_labels: tuple[str, ...] = (NOTHING_LABEL,),
     ) -> None:
         if not 0.0 <= min_confidence <= 1.0:
             raise ValueError("min_confidence must be between 0.0 and 1.0!")
@@ -34,7 +35,10 @@ class TemporalDecoder:
         self._min_confidence = min_confidence
         self._hold_seconds = hold_seconds
         self._release_seconds = release_seconds
-        self._neutral_labels = frozenset(neutral_labels)
+
+        self._neutral_labels = frozenset(
+            normalize_label(label) for label in neutral_labels
+        )
 
         self._candidate_label: str | None = None
         self._candidate_since: float | None = None
@@ -51,9 +55,10 @@ class TemporalDecoder:
         now: float | None = None,
     ) -> DecoderUpdate:
         timestamp = monotonic() if now is None else now
+
         self._validate_timestamp(timestamp)
 
-        label = prediction.label.strip()
+        label = normalize_label(prediction.label)
 
         is_neutral = (
             prediction.confidence < self._min_confidence
@@ -63,7 +68,10 @@ class TemporalDecoder:
         if is_neutral:
             return self._handle_neutral(timestamp)
 
-        return self._handle_sign(label, timestamp)
+        return self._handle_sign(
+            label,
+            timestamp,
+        )
 
     def reset(self) -> None:
         self._candidate_label = None
@@ -72,7 +80,10 @@ class TemporalDecoder:
         self._release_since = None
         self._last_timestamp = None
 
-    def _handle_neutral(self, timestamp: float) -> DecoderUpdate:
+    def _handle_neutral(
+        self,
+        timestamp: float,
+    ) -> DecoderUpdate:
         self._candidate_label = None
         self._candidate_since = None
 
@@ -127,8 +138,11 @@ class TemporalDecoder:
             release_completed=False,
         )
 
-    def _validate_timestamp(self, timestamp: float) -> None:
+    def _validate_timestamp(
+        self,
+        timestamp: float,
+    ) -> None:
         if self._last_timestamp is not None and timestamp < self._last_timestamp:
-            raise ValueError("Timestamp must be monotically increasing!")
+            raise ValueError("Timestamps must be monotonically " "increasing")
 
         self._last_timestamp = timestamp
