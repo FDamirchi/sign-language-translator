@@ -3,32 +3,42 @@ from dataclasses import dataclass, field
 
 @dataclass(slots=True)
 class TextBuffer:
-    separator: str = ""
-    _tokens: list[str] = field(default_factory=list) # type: ignore
+    _characters: list[str] = field(default_factory=list) # type: ignore
 
     @property
     def text(self) -> str:
-        return self.separator.join(self._tokens)
+        return "".join(self._characters)
 
-    def append(self, token: str) -> None:
-        normalized_token = token.strip().upper()
+    @property
+    def finalized_text(self) -> str:
+        return self.text.strip()
 
-        if not normalized_token:
-            raise ValueError("Cannot append an empty token")
+    def append_letter(self, letter: str) -> None:
+        normalized = letter.strip().upper()
 
-        self._tokens.append(normalized_token)
+        if len(normalized) != 1 or not ("A" <= normalized <= "Z"):
+            raise ValueError(f"Expected one English letter, " f"got {letter!r}")
+
+        self._characters.append(normalized)
+
+    def append_space(self) -> bool:
+        if not self._characters or self._characters[-1] == " ":
+            return False
+
+        self._characters.append(" ")
+        return True
 
     def backspace(self) -> str | None:
-        if not self._tokens:
+        if not self._characters:
             return None
 
-        return self._tokens.pop()
+        return self._characters.pop()
 
     def clear(self) -> None:
-        self._tokens.clear()
+        self._characters.clear()
 
     def __len__(self) -> int:
-        return len(self._tokens)
+        return len(self._characters)
 
     def __bool__(self) -> bool:
-        return bool(self._tokens)
+        return bool(self._characters)
