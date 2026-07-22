@@ -5,6 +5,7 @@ from numpy.typing import NDArray
 from sign_translator.contracts import Prediction
 from sign_translator.decoding.sequence_finalizer import FinalizationUpdate
 from sign_translator.decoding.temporal_decoder import DecoderUpdate
+from sign_translator.labels import NOTHING_LABEL
 from sign_translator.vision.roi import RoiBox
 
 
@@ -26,11 +27,14 @@ def draw_overlay(
     )
 
     text_x = box.x1
-    text_y = max(30, box.y1 - 62)
+    text_y = max(
+        30,
+        box.y1 - 62,
+    )
 
     _draw_text(
         frame,
-        f"Prediction: {prediction.label}",
+        ("Prediction: " f"{prediction.label.upper()}"),
         text_x,
         text_y,
         scale=0.65,
@@ -38,7 +42,7 @@ def draw_overlay(
 
     _draw_text(
         frame,
-        f"Confidence: {prediction.confidence:.1%}",
+        ("Confidence: " f"{prediction.confidence:.1%}"),
         text_x,
         text_y + 26,
         scale=0.55,
@@ -61,10 +65,10 @@ def draw_overlay(
         progress=decoder_update.progress,
     )
 
-    if finalization_update.background_active:
+    if finalization_update.neutral_active:
         _draw_text(
             frame,
-            ("Finalizing: " f"{int(finalization_update.progress * 100)}%"),
+            ("Finalizing text: " f"{int(finalization_update.progress * 100)}%"),
             box.x1,
             box.y2 + 54,
             scale=0.55,
@@ -76,7 +80,7 @@ def draw_overlay(
             x1=box.x1,
             y1=box.y2 + 64,
             x2=box.x2,
-            progress=finalization_update.progress,
+            progress=(finalization_update.progress),
         )
 
     displayed_current = current_text or "-"
@@ -84,7 +88,7 @@ def draw_overlay(
 
     _draw_text(
         frame,
-        f"Current word: {displayed_current}",
+        ("Current text: " f"{displayed_current}"),
         24,
         frame.shape[0] - 56,
         scale=0.75,
@@ -92,7 +96,7 @@ def draw_overlay(
 
     _draw_text(
         frame,
-        f"Last word: {displayed_last}",
+        ("Last text: " f"{displayed_last}"),
         24,
         frame.shape[0] - 26,
         scale=0.65,
@@ -112,19 +116,20 @@ def _build_decoder_status(
     update: DecoderUpdate,
 ) -> str:
     if update.accepted_label is not None:
-        return f"Accepted: {update.accepted_label}"
+        return "Accepted: " f"{update.accepted_label}"
 
     if update.is_locked:
-        return "Locked"
+        return "Locked - show " f"{NOTHING_LABEL}"
 
     if update.candidate_label is not None:
         percentage = int(update.progress * 100)
-        return f"Hold steady: {percentage}%"
+
+        return "Hold steady: " f"{percentage}%"
 
     if update.release_completed:
         return "Released"
 
-    return "Waiting for stable sign"
+    return "Waiting for a stable sign"
 
 
 def _draw_progress_bar(
@@ -157,7 +162,10 @@ def _draw_progress_bar(
     cv2.rectangle(
         frame,
         (x1, y1),
-        (x1 + progress_width, y2),
+        (
+            x1 + progress_width,
+            y2,
+        ),
         (0, 255, 255),
         -1,
     )
@@ -170,7 +178,11 @@ def _draw_text(
     y: int,
     *,
     scale: float,
-    color: tuple[int, int, int] = (255, 255, 255),
+    color: tuple[int, int, int] = (
+        255,
+        255,
+        255,
+    ),
 ) -> None:
     cv2.putText(
         frame,
