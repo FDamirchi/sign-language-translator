@@ -17,6 +17,13 @@ COMMAND_LABELS = frozenset(
 
 SUPPORTED_LABELS = frozenset(LETTER_LABELS) | COMMAND_LABELS
 
+MODEL_OUTPUT_LABELS: tuple[str, ...] = (
+    *LETTER_LABELS,
+    DELETE_LABEL,
+    NOTHING_LABEL,
+    SPACE_LABEL,
+)
+
 
 def normalize_label(label: str) -> str:
     normalized = label.strip().upper()
