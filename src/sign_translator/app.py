@@ -19,6 +19,8 @@ def run(config: AppConfig | None = None) -> None:
 
     predictor = create_predictor(
         app_config.predictor_backend,
+        model_input=app_config.model_input,
+        keras_config=app_config.keras,
     )
 
     decoder = TemporalDecoder(
@@ -53,12 +55,12 @@ def run(config: AppConfig | None = None) -> None:
                     )
 
                 roi_box = resolve_roi(
-                    frame, # type: ignore
+                    frame,  # type: ignore
                     app_config.roi,
                 )
 
                 roi_image = crop_roi(
-                    frame, # type: ignore
+                    frame,  # type: ignore
                     roi_box,
                 )
 
@@ -101,7 +103,7 @@ def run(config: AppConfig | None = None) -> None:
                     text_buffer.clear()
 
                 draw_overlay(
-                    frame, # type: ignore
+                    frame,  # type: ignore
                     roi_box,
                     prediction,
                     decoder_update,
