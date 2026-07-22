@@ -3,8 +3,9 @@ import numpy as np
 from numpy.typing import NDArray
 
 from sign_translator.contracts import Prediction
-from sign_translator.vision.roi import RoiBox
+from sign_translator.decoding.sequence_finalizer import FinalizationUpdate
 from sign_translator.decoding.temporal_decoder import DecoderUpdate
+from sign_translator.vision.roi import RoiBox
 
 
 def draw_overlay(
@@ -12,7 +13,9 @@ def draw_overlay(
     box: RoiBox,
     prediction: Prediction,
     decoder_update: DecoderUpdate,
-    translated_text: str,
+    finalization_update: FinalizationUpdate,
+    current_text: str,
+    last_finalized_text: str,
 ) -> None:
     cv2.rectangle(
         frame,
@@ -22,85 +25,97 @@ def draw_overlay(
         2,
     )
 
-    prediction_text = f"Prediction: {prediction.label}"
-    confidence_text = f"Confidence: {prediction.confidence:.1%}"
-    status_text = _build_status_text(decoder_update)
-
     text_x = box.x1
     text_y = max(30, box.y1 - 62)
 
-    cv2.putText(
+    _draw_text(
         frame,
-        prediction_text,
-        (text_x, text_y),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        0.65,
-        (0, 255, 0),
-        2,
-        cv2.LINE_AA,
+        f"Prediction: {prediction.label}",
+        text_x,
+        text_y,
+        scale=0.65,
     )
 
-    cv2.putText(
+    _draw_text(
         frame,
-        confidence_text,
-        (text_x, text_y + 26),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        0.55,
-        (0, 255, 0),
-        2,
-        cv2.LINE_AA,
+        f"Confidence: {prediction.confidence:.1%}",
+        text_x,
+        text_y + 26,
+        scale=0.55,
     )
 
-    cv2.putText(
+    _draw_text(
         frame,
-        status_text,
-        (text_x, text_y + 52),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        0.55,
-        (0, 255, 255),
-        2,
-        cv2.LINE_AA,
+        _build_decoder_status(decoder_update),
+        text_x,
+        text_y + 52,
+        scale=0.55,
+        color=(0, 255, 255),
     )
 
     _draw_progress_bar(
         frame,
-        box,
-        decoder_update.progress,
+        x1=box.x1,
+        y1=box.y2 + 12,
+        x2=box.x2,
+        progress=decoder_update.progress,
     )
 
-    displayed_text = translated_text or "-"
+    if finalization_update.background_active:
+        _draw_text(
+            frame,
+            ("Finalizing: " f"{int(finalization_update.progress * 100)}%"),
+            box.x1,
+            box.y2 + 54,
+            scale=0.55,
+            color=(255, 255, 0),
+        )
 
-    cv2.putText(
+        _draw_progress_bar(
+            frame,
+            x1=box.x1,
+            y1=box.y2 + 64,
+            x2=box.x2,
+            progress=finalization_update.progress,
+        )
+
+    displayed_current = current_text or "-"
+    displayed_last = last_finalized_text or "-"
+
+    _draw_text(
         frame,
-        f"Text: {displayed_text}",
-        (24, frame.shape[0] - 28),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        0.75,
-        (255, 255, 255),
-        2,
-        cv2.LINE_AA,
+        f"Current word: {displayed_current}",
+        24,
+        frame.shape[0] - 56,
+        scale=0.75,
     )
 
-    cv2.putText(
+    _draw_text(
+        frame,
+        f"Last word: {displayed_last}",
+        24,
+        frame.shape[0] - 26,
+        scale=0.65,
+        color=(200, 200, 200),
+    )
+
+    _draw_text(
         frame,
         "Press Q or ESC to quit",
-        (24, 32),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        0.55,
-        (255, 255, 255),
-        1,
-        cv2.LINE_AA,
+        24,
+        32,
+        scale=0.55,
     )
 
 
-def _build_status_text(
+def _build_decoder_status(
     update: DecoderUpdate,
 ) -> str:
     if update.accepted_label is not None:
         return f"Accepted: {update.accepted_label}"
 
     if update.is_locked:
-        return "Locked - show BACKGROUND"
+        return "Locked"
 
     if update.candidate_label is not None:
         percentage = int(update.progress * 100)
@@ -114,33 +129,56 @@ def _build_status_text(
 
 def _draw_progress_bar(
     frame: NDArray[np.uint8],
-    box: RoiBox,
+    *,
+    x1: int,
+    y1: int,
+    x2: int,
     progress: float,
 ) -> None:
-    bar_x1 = box.x1
-    bar_y1 = box.y2 + 12
-    bar_x2 = box.x2
-    bar_y2 = bar_y1 + 14
+    y2 = y1 + 14
 
-    if bar_y2 >= frame.shape[0]:
+    if y2 >= frame.shape[0]:
         return
 
     cv2.rectangle(
         frame,
-        (bar_x1, bar_y1),
-        (bar_x2, bar_y2),
+        (x1, y1),
+        (x2, y2),
         (80, 80, 80),
         1,
     )
 
-    available_width = bar_x2 - bar_x1
-    progress_width = int(available_width * progress)
+    width = x2 - x1
+    progress_width = int(width * progress)
 
-    if progress_width > 0:
-        cv2.rectangle(
-            frame,
-            (bar_x1, bar_y1),
-            (bar_x1 + progress_width, bar_y2),
-            (0, 255, 255),
-            -1,
-        )
+    if progress_width <= 0:
+        return
+
+    cv2.rectangle(
+        frame,
+        (x1, y1),
+        (x1 + progress_width, y2),
+        (0, 255, 255),
+        -1,
+    )
+
+
+def _draw_text(
+    frame: NDArray[np.uint8],
+    text: str,
+    x: int,
+    y: int,
+    *,
+    scale: float,
+    color: tuple[int, int, int] = (255, 255, 255),
+) -> None:
+    cv2.putText(
+        frame,
+        text,
+        (x, y),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        scale,
+        color,
+        2,
+        cv2.LINE_AA,
+    )

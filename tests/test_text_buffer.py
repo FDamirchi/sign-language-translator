@@ -1,29 +1,40 @@
 from sign_translator.decoding.text_buffer import TextBuffer
 
 
-def test_appends_tokens() -> None:
-    buffer = TextBuffer(separator=" ")
+def test_appends_letters_without_separator() -> None:
+    buffer = TextBuffer()
 
+    buffer.append("C")
     buffer.append("A")
-    buffer.append("B")
+    buffer.append("T")
 
-    assert buffer.text == "A B"
-    assert len(buffer) == 2
+    assert buffer.text == "CAT"
+    assert len(buffer) == 3
 
 
-def test_backspace_removes_last_token() -> None:
-    buffer = TextBuffer(separator=" ")
+def test_letters_are_normalized_to_uppercase() -> None:
+    buffer = TextBuffer()
 
+    buffer.append("a")
+    buffer.append("b")
+
+    assert buffer.text == "AB"
+
+
+def test_backspace_removes_last_letter() -> None:
+    buffer = TextBuffer()
+
+    buffer.append("C")
     buffer.append("A")
-    buffer.append("B")
+    buffer.append("T")
 
     removed = buffer.backspace()
 
-    assert removed == "B"
-    assert buffer.text == "A"
+    assert removed == "T"
+    assert buffer.text == "CA"
 
 
-def test_clear_removes_all_tokens() -> None:
+def test_clear_removes_all_letters() -> None:
     buffer = TextBuffer()
 
     buffer.append("A")
@@ -31,3 +42,4 @@ def test_clear_removes_all_tokens() -> None:
 
     assert buffer.text == ""
     assert len(buffer) == 0
+    assert bool(buffer) is False

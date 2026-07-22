@@ -1,9 +1,13 @@
+from time import monotonic
+
 import cv2
 
 from sign_translator.config import AppConfig
+from sign_translator.decoding.sequence_finalizer import SequenceFinalizer
 from sign_translator.decoding.temporal_decoder import TemporalDecoder
 from sign_translator.decoding.text_buffer import TextBuffer
 from sign_translator.inference.factory import create_predictor
+from sign_translator.speech.factory import create_speech_engine
 from sign_translator.vision.camera import Camera, CameraError
 from sign_translator.vision.overlay import draw_overlay
 from sign_translator.vision.roi import crop_roi, resolve_roi
@@ -23,7 +27,18 @@ def run(config: AppConfig | None = None) -> None:
         neutral_labels=app_config.decoder.neutral_labels,
     )
 
-    text_buffer = TextBuffer(separator=" ")
+    finalizer = SequenceFinalizer(
+        min_confidence=(app_config.finalization.min_confidence),
+        background_seconds=(app_config.finalization.background_seconds),
+        background_labels=(app_config.finalization.background_labels),
+    )
+
+    text_buffer = TextBuffer(separator="")
+    last_finalized_text = ""
+
+    speech_engine = create_speech_engine(
+        app_config.speech.backend,
+    )
 
     try:
         with Camera(app_config.camera) as camera:
@@ -47,8 +62,11 @@ def run(config: AppConfig | None = None) -> None:
                     roi_image,
                 )
 
+                timestamp = monotonic()
+
                 decoder_update = decoder.update(
                     prediction,
+                    now=timestamp,
                 )
 
                 if decoder_update.accepted_label is not None:
@@ -56,12 +74,31 @@ def run(config: AppConfig | None = None) -> None:
                         decoder_update.accepted_label,
                     )
 
+                finalization_update = finalizer.update(
+                    prediction,
+                    has_content=bool(text_buffer),
+                    now=timestamp,
+                )
+
+                if finalization_update.finalized:
+                    last_finalized_text = text_buffer.text
+
+                    speech_text = last_finalized_text
+
+                    if app_config.speech.lowercase_before_speaking:
+                        speech_text = speech_text.lower()
+
+                    speech_engine.speak(speech_text)
+                    text_buffer.clear()
+
                 draw_overlay(
                     frame,  # type: ignore
                     roi_box,
                     prediction,
                     decoder_update,
+                    finalization_update,
                     text_buffer.text,
+                    last_finalized_text,
                 )
 
                 cv2.imshow(
@@ -75,9 +112,8 @@ def run(config: AppConfig | None = None) -> None:
                     break
 
     except CameraError as exc:
-        raise SystemExit(
-            f"Camera error: {exc}",
-        ) from exc
+        raise SystemExit(f"Camera error: {exc}") from exc
 
     finally:
+        speech_engine.close()
         cv2.destroyAllWindows()

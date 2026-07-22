@@ -14,8 +14,12 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=8.0,<10.0",
-    "ruff>=0.12,<1.0",
+    "pytest",
+    "ruff",
+]
+
+tts = [
+    "pyttsx3",
 ]
 
 [tool.setuptools.packages.find]
