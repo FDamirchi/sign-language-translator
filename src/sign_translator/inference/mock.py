@@ -12,10 +12,14 @@ class TimedMockPredictor:
     labels: tuple[str, ...] = (
         "A",
         "B",
+        "SPACE",
         "C",
-        "BACKGROUND",
-        "BACKGROUND",
+        "DEL",
+        "D",
+        "NOTHING",
+        "NOTHING",
     )
+
     seconds_per_label: float = 3.0
 
     _started_at: float | None = field(
@@ -26,10 +30,10 @@ class TimedMockPredictor:
 
     def __post_init__(self) -> None:
         if not self.labels:
-            raise ValueError("Mock predictor labels cannot be empty")
+            raise ValueError("Mock predictor labels cannot be empty!")
 
         if self.seconds_per_label <= 0:
-            raise ValueError("seconds_per_label must be greater than zero")
+            raise ValueError("seconds_per_label must be greater than 0!")
 
     def predict(
         self,
