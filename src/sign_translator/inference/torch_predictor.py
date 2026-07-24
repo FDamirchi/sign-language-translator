@@ -61,7 +61,7 @@ class TorchPredictor:
             std=self._std,
         )
 
-        batch = torch.from_numpy(preprocessed.batch).to(
+        batch = torch.from_numpy(preprocessed.batch).to( # type: ignore
             self._device,
             non_blocking=True,
         )
