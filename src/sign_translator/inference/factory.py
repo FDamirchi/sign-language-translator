@@ -1,6 +1,6 @@
 from sign_translator.config import KerasPredictorConfig, ModelInputConfig
 from sign_translator.inference.base import Predictor
-from sign_translator.inference.keras_predictor import KerasPredictor
+from sign_translator.inference.torch_predictor import KerasPredictor
 from sign_translator.inference.mock import TimedMockPredictor
 
 

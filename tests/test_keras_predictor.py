@@ -7,7 +7,7 @@ from numpy.typing import NDArray
 from sign_translator.config import (
     ModelInputConfig,
 )
-from sign_translator.inference.keras_predictor import (
+from sign_translator.inference.torch_predictor import (
     KerasPredictor,
     ModelLoadError,
 )
