@@ -31,17 +31,29 @@ class ModelInputConfig:
 
 
 @dataclass(frozen=True, slots=True)
-class KerasPredictorConfig:
-    model_path: Path = Path("models/asl_model.keras")
-
-    output_mode: str = "auto"
+class TorchPredictorConfig:
+    model_path: Path = Path("models/final_model.pth")
 
     labels: tuple[str, ...] = MODEL_OUTPUT_LABELS
+
+    mean: tuple[float, float, float] = (
+        0.518834114074707,
+        0.49898985028266907,
+        0.5144101977348328,
+    )
+
+    std: tuple[float, float, float] = (
+        0.20458196103572845,
+        0.2336411476135254,
+        0.24120348691940308,
+    )
+
+    device: str = "auto"
 
 
 @dataclass(frozen=True, slots=True)
 class DecoderConfig:
-    min_confidence: float = 0.51
+    min_confidence: float = 0.80
     hold_seconds: float = 2.0
     release_seconds: float = 0.4
 
@@ -65,14 +77,18 @@ class SpeechConfig:
 @dataclass(frozen=True, slots=True)
 class AppConfig:
     window_title: str = "Sign-Language Translator"
-    predictor_backend: str = "mock"  # TODO: Change to the main model later
 
-    quit_keys: tuple[int, ...] = (ord("q"), 27)
+    predictor_backend: str = "torch"
+
+    quit_keys: tuple[int, ...] = (
+        ord("q"),
+        27,
+    )
 
     camera: CameraConfig = field(default_factory=CameraConfig)
     roi: RoiConfig = field(default_factory=RoiConfig)
     model_input: ModelInputConfig = field(default_factory=ModelInputConfig)
-    keras: KerasPredictorConfig = field(default_factory=KerasPredictorConfig)
+    pytorch: TorchPredictorConfig = field(default_factory=TorchPredictorConfig)
     decoder: DecoderConfig = field(default_factory=DecoderConfig)
     finalization: FinalizationConfig = field(default_factory=FinalizationConfig)
     speech: SpeechConfig = field(default_factory=SpeechConfig)
