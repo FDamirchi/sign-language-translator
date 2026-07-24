@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from dataclasses import dataclass
 
 import cv2
@@ -25,6 +26,9 @@ class PreprocessedImage:
 def preprocess_bgr_image(
     image: NDArray[np.uint8],
     config: ModelInputConfig | None = None,
+    *,
+    mean: Sequence[float],
+    std: Sequence[float],
 ) -> PreprocessedImage:
     input_config = config or ModelInputConfig()
 
@@ -36,11 +40,17 @@ def preprocess_bgr_image(
 
     if input_config.channels != 3:
         raise ImagePreprocessingError(
-            "Only three-channel RGB model input is supported!"
+            "Only three-channel model input is currently supported!"
         )
 
     if input_config.color_space.strip().upper() != "RGB":
-        raise ImagePreprocessingError("Only RGB model input is supported!")
+        raise ImagePreprocessingError("Only RGB model input is currently supported!")
+
+    mean_array, std_array = _validate_normalization_stats(
+        mean=mean,
+        std=std,
+        channels=input_config.channels,
+    )
 
     resized = cv2.resize(
         image,
@@ -63,9 +73,45 @@ def preprocess_bgr_image(
     if input_config.normalize_to_unit_interval:
         converted /= 255.0
 
-    batch = np.expand_dims(converted, axis=0)
+    normalized = (converted - mean_array.reshape(1, 1, 3)) / std_array.reshape(1, 1, 3)
+
+    channels_first = np.transpose(normalized, (2, 0, 1))
+
+    batch = np.expand_dims(channels_first, axis=0)
+
+    batch = np.ascontiguousarray(batch, dtype=np.float32)
 
     return PreprocessedImage(batch=batch)
+
+
+def _validate_normalization_stats(
+    *,
+    mean: Sequence[float],
+    std: Sequence[float],
+    channels: int,
+) -> tuple[
+    NDArray[np.float32],
+    NDArray[np.float32],
+]:
+    mean_array = np.asarray(mean, dtype=np.float32)
+
+    std_array = np.asarray(std, dtype=np.float32)
+
+    if mean_array.shape != (channels,):
+        raise ImagePreprocessingError("Mean must contain one value per image channel!")
+
+    if std_array.shape != (channels,):
+        raise ImagePreprocessingError("Std must contain one value per image channel!")
+
+    if not np.all(np.isfinite(mean_array)):
+        raise ImagePreprocessingError("Mean contains invalid values!")
+
+    if not np.all(np.isfinite(std_array)) or np.any(std_array <= 0):
+        raise ImagePreprocessingError(
+            "Std values must be finite and greater than zero!"
+        )
+
+    return mean_array, std_array
 
 
 def _select_interpolation(
