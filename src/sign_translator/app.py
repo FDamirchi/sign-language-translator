@@ -19,8 +19,8 @@ def run(config: AppConfig | None = None) -> None:
 
     predictor = create_predictor(
         app_config.predictor_backend,
-        model_input=app_config.model_input,
-        keras_config=app_config.keras,
+        model_input=(app_config.model_input),
+        torch_config=(app_config.pytorch),
     )
 
     decoder = TemporalDecoder(
