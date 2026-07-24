@@ -23,7 +23,7 @@ tts = [
 ]
 
 model = [
-    "tensorflow>=2.21,<3.0",
+    "torch>=2.6,<3.0",
 ]
 
 [tool.setuptools.packages.find]
