@@ -1,0 +1,867 @@
+% !TeX program = xelatex
+\documentclass[12pt,a4paper,oneside]{report}
+
+\usepackage[a4paper,top=2.3cm,bottom=2.4cm,left=2.2cm,right=2.2cm,headheight=40pt]{geometry}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{enumitem}
+\usepackage{ragged2e}
+\usepackage{amsmath,amssymb}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,fit,backgrounds,calc}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage[most]{tcolorbox}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{xepersian}
+
+% ---------- Editable metadata ----------
+\newcommand{\UniversityName}{شریف صنعتی دانشگاه}
+\newcommand{\FacultyName}{کامپیوتر مهندسی دانشکده}
+\newcommand{\CourseName}{پروژه هوش مصنوعی}
+\newcommand{\InstructorName}{دکتر تن قطاری}
+\newcommand{\StudentOne}{فاطمه بهزادی‌ دیل}
+\newcommand{\StudentOneID}{شماره دانشجویی اول}
+\newcommand{\StudentTwo}{فاطمه دمیرچی}
+\newcommand{\StudentTwoID}{403110241}
+\newcommand{\RepoURL}{https://github.com/FDamirchi/sign-language-translator}
+\newcommand{\UniversityLogo}{assets/sharif_logo_blue.png}
+
+% ---------- Fonts ----------
+\settextfont[
+  BoldFont={B Nazanin},
+  ItalicFont={B Nazanin},
+  BoldItalicFont={B Nazanin},
+  Scale=1.16
+]{B Nazanin}
+\newfontfamily\TitleFont[
+  BoldFont={B Titr},
+  Scale=1.02
+]{B Titr}
+\newfontfamily\MetricFont[
+  Script=Arabic,
+  BoldFont={B Nazanin},
+  Scale=1.16
+]{B Nazanin}
+\setlatintextfont[Scale=0.92]{DejaVu Sans}
+\setmonofont[Scale=0.84]{DejaVu Sans Mono}
+
+% ---------- Colors inspired by the university identity and AI interfaces ----------
+\definecolor{Primary}{HTML}{0B4F8A}
+\definecolor{PrimaryDark}{HTML}{082F55}
+\definecolor{Secondary}{HTML}{00A6A6}
+\definecolor{Accent}{HTML}{6C63FF}
+\definecolor{Warm}{HTML}{F59E0B}
+\definecolor{SoftBlue}{HTML}{EEF6FC}
+\definecolor{SoftGreen}{HTML}{EAF9F7}
+\definecolor{SoftPink}{HTML}{F4F0FF}
+\definecolor{SoftGray}{HTML}{F4F7FA}
+\definecolor{DarkGray}{HTML}{243447}
+\definecolor{CodeBg}{HTML}{F7F9FC}
+
+% ---------- General settings ----------
+\hypersetup{
+  colorlinks=true,
+  linkcolor=Primary,
+  urlcolor=Accent,
+  citecolor=Secondary,
+  pdftitle={گزارش پروژه مترجم بلادرنگ زبان اشاره},
+  pdfauthor={\StudentOne، \StudentTwo}
+}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+\linespread{1.38}
+\AtBeginDocument{\setRTL\justifying}
+\setlist[itemize]{label=\textcolor{Secondary}{\scriptsize$\blacktriangleright$},itemsep=3pt,topsep=4pt,rightmargin=1.2em}
+\setlist[enumerate]{itemsep=3pt,topsep=4pt,rightmargin=1.2em}
+\captionsetup{font=small,labelfont=bf,justification=centering}
+
+\titleformat{\chapter}[display]
+  {\TitleFont\fontsize{25}{34}\selectfont\color{Primary}\raggedleft}
+  {\TitleFont\color{Secondary}\Large\raggedleft فصل \thechapter}
+  {5pt}{{\color{Primary!35}\titlerule[1.1pt]}\vspace{7pt}\color{Primary}\raggedleft}
+\titleformat{\section}
+  {\TitleFont\fontsize{18}{26}\selectfont\color{Primary}\raggedleft}
+  {\thesection}{0.65em}{}
+\titleformat{\subsection}
+  {\TitleFont\fontsize{15}{22}\selectfont\color{Secondary}\raggedleft}
+  {\thesubsection}{0.65em}{}
+
+
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[R]{\smash{\small\color{DarkGray}گزارش پروژه مترجم بلادرنگ زبان اشاره}}
+\fancyhead[L]{\smash{\small\color{DarkGray}\CourseName}}
+\fancyfoot[C]{\color{Primary}\thepage}
+\renewcommand{\headrulewidth}{0.45pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{Primary!30}\leaders\hrule height \headrulewidth\hfill}}
+\renewcommand{\footrulewidth}{0pt}
+
+\newcolumntype{Y}{>{\RTL\raggedleft\arraybackslash}X}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{R}[1]{>{\RTL\raggedleft\arraybackslash}p{#1}}
+
+\newtcolorbox{infobox}[1][]{
+  enhanced,breakable,colback=SoftBlue,colframe=Primary,
+  boxrule=0.7pt,arc=3mm,left=4mm,right=4mm,top=2.5mm,bottom=2.5mm,
+  title=#1,fonttitle=\TitleFont,coltitle=Primary
+}
+\newtcolorbox{successbox}[1][]{
+  enhanced,breakable,colback=SoftGreen,colframe=Secondary,
+  boxrule=0.7pt,arc=3mm,left=4mm,right=4mm,top=2.5mm,bottom=2.5mm,
+  title=#1,fonttitle=\TitleFont,coltitle=Secondary
+}
+\newtcolorbox{warningbox}[1][]{
+  enhanced,breakable,colback=SoftPink,colframe=Accent,
+  boxrule=0.7pt,arc=3mm,left=4mm,right=4mm,top=2.5mm,bottom=2.5mm,
+  title=#1,fonttitle=\TitleFont,coltitle=Accent
+}
+\newtcolorbox{codebox}[1][]{
+  enhanced,breakable,colback=CodeBg,colframe=DarkGray,
+  boxrule=0.5pt,arc=2mm,left=3mm,right=3mm,top=2mm,bottom=2mm,
+  title=#1,fonttitle=\TitleFont,coltitle=DarkGray
+}
+
+\lstdefinestyle{pythonstyle}{
+  language=Python,
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\color{Accent}\bfseries,
+  commentstyle=\color{Secondary},
+  stringstyle=\color{Warm},
+  backgroundcolor=\color{CodeBg},
+  frame=single,
+  rulecolor=\color{DarkGray!35},
+  breaklines=true,
+  showstringspaces=false,
+  numbers=left,
+  numberstyle=\tiny\color{DarkGray!70},
+  xleftmargin=1.2em,
+  framexleftmargin=0.8em,
+  tabsize=4
+}
+
+% ---------- Helper commands ----------
+\newcommand{\eng}[1]{\lr{#1}}
+\newcommand{\code}[1]{\lr{\nolinkurl{#1}}}
+\newcommand{\metric}[1]{\lr{{\MetricFont\textbf{#1}}}}
+\newcommand{\yes}{\textcolor{Secondary}{\bfseries انجام‌شده}}
+\newcommand{\partialdone}{\textcolor{Warm}{\bfseries نیازمند تکمیل}}
+
+\begin{document}
+\setRTL
+% Reapply heading styles after the bidi/xepersian patches are loaded
+\titleformat{\chapter}[display]
+  {\TitleFont\fontsize{25}{35}\selectfont\color{Primary}\raggedleft}
+  {\TitleFont\fontsize{17}{24}\selectfont\color{Secondary}\raggedleft فصل \thechapter}
+  {5pt}{{\color{Primary!30}\titlerule[1.1pt]}\vspace{9pt}\color{Primary}\raggedleft}
+
+% ==================== Title page ====================
+\begin{titlepage}
+\begin{tikzpicture}[remember picture,overlay]
+  \shade[top color=PrimaryDark,bottom color=Primary] (current page.north west)
+    rectangle ([yshift=-6.1cm]current page.north east);
+  \fill[Secondary] ([yshift=-6.1cm]current page.north west)
+    rectangle ([yshift=-6.22cm]current page.north east);
+  \fill[SoftGray] (current page.south west)
+    rectangle ([yshift=2.05cm]current page.south east);
+
+  % Minimal neural-network/circuit pattern in the cover background
+  \foreach \x/\y in {2.0/-1.1,4.1/-2.2,6.0/-1.25,8.2/-2.7,10.5/-1.4,12.8/-2.35,15.2/-1.15,17.3/-2.55} {
+    \fill[white,opacity=0.16] ([xshift=\x cm,yshift=\y cm]current page.north west) circle (1.7pt);
+  }
+  \draw[white,opacity=0.12,line width=0.7pt]
+    ([xshift=2.0cm,yshift=-1.1cm]current page.north west) --
+    ([xshift=4.1cm,yshift=-2.2cm]current page.north west) --
+    ([xshift=6.0cm,yshift=-1.25cm]current page.north west) --
+    ([xshift=8.2cm,yshift=-2.7cm]current page.north west) --
+    ([xshift=10.5cm,yshift=-1.4cm]current page.north west) --
+    ([xshift=12.8cm,yshift=-2.35cm]current page.north west) --
+    ([xshift=15.2cm,yshift=-1.15cm]current page.north west) --
+    ([xshift=17.3cm,yshift=-2.55cm]current page.north west);
+
+  \node[fill=white,draw=white,minimum size=2.35cm,circle,inner sep=4mm]
+    at ([xshift=-2.35cm,yshift=-2.35cm]current page.north east)
+    {\includegraphics[width=1.65cm]{\UniversityLogo}};
+  \node[anchor=east,text=white,font=\TitleFont\fontsize{18}{25}\selectfont]
+    at ([xshift=-4.0cm,yshift=-1.95cm]current page.north east) {\UniversityName};
+  \node[anchor=east,text=white!85,font=\fontsize{12}{18}\selectfont]
+    at ([xshift=-4.0cm,yshift=-2.75cm]current page.north east) {\FacultyName};
+  \node[anchor=east,text=white!48,font=\fontsize{46}{50}\selectfont]
+    at ([xshift=-1.2cm,yshift=-5.05cm]current page.north east) {\lr{AI}};
+\end{tikzpicture}
+
+\vspace*{6.55cm}
+\begin{flushright}
+  {\TitleFont\fontsize{28}{39}\selectfont\textcolor{Primary}{گزارش جامع پروژه شماره ۳}}\par
+  \vspace{0.55cm}
+  {\TitleFont\fontsize{20}{31}\selectfont\textcolor{DarkGray}{طراحی و پیاده‌سازی سیستم طبقه‌بندی تصاویر زبان اشاره و مترجم بلادرنگ به گفتار}}\par
+  \vspace{0.35cm}
+  {\color{Secondary}\rule{7.2cm}{1.5pt}}\par
+\end{flushright}
+
+\vspace{1.0cm}
+\begin{tcolorbox}[
+  enhanced,colback=white,colframe=Primary!28,boxrule=0.75pt,arc=4mm,
+  shadow={1.5mm}{-1.5mm}{0mm}{black!12},left=7mm,right=7mm,top=5mm,bottom=5mm,
+  borderline east={2.4pt}{0pt}{Secondary}
+]
+\begin{tabularx}{\textwidth}{R{4.3cm}Y}
+\textbf{نام درس} & \CourseName \\
+\textbf{استاد} & \InstructorName \\
+\textbf{دانشجوی اول} & \StudentOne\quad \textcolor{Secondary}{\lr{|}} \quad \StudentOneID \\
+\textbf{دانشجوی دوم} & \StudentTwo\quad \textcolor{Secondary}{\lr{|}} \quad \StudentTwoID \\
+\textbf{مخزن پروژه} & \href{\RepoURL}{\lr{github.com/FDamirchi/sign-language-translator}}
+\end{tabularx}
+\end{tcolorbox}
+
+\vfill
+\begin{center}
+\end{center}
+\end{titlepage}
+
+\pagenumbering{alph}
+\chapter*{چکیده}
+\addcontentsline{toc}{chapter}{چکیده}
+این پروژه یک سامانه انتهابه‌انتهای تشخیص حروف زبان اشاره آمریکایی از تصویر، تجمیع خروجی به متن و تبدیل متن نهایی به گفتار را پیاده‌سازی می‌کند. داده مورد استفاده شامل \metric{۸۷\,۰۰۰} تصویر آموزشی در \metric{۲۹} کلاس است: حروف \eng{A--Z} و سه فرمان \eng{del}، \eng{nothing} و \eng{space}. تحلیل اکتشافی نشان می‌دهد تمام کلاس‌های مجموعه آموزشی دقیقاً \metric{۳\,۰۰۰} تصویر دارند، تصاویر همگی \eng{RGB} و با اندازه ثابت \eng{200×200} پیکسل هستند و در نتیجه داده از نظر تعداد نمونه کاملاً متوازن است.
+
+در فاز مدل‌سازی، یک شبکه عصبی پیچشی چهاربخشی با \metric{۱۹\,۲۷۸\,۱۷۳} پارامتر طراحی و با چارچوب \eng{PyTorch} آموزش داده شد. داده‌ها با نسبت‌های \metric{۷۵/۱۵/۱۰} به آموزش، اعتبارسنجی و آزمون تقسیم شدند. مدل با بهینه‌ساز \eng{Adam}، نرخ یادگیری \eng{0.001}، اندازه دسته \eng{64} و به‌مدت \eng{10} دوره آموزش دید. بهترین دقت اعتبارسنجی در دوره نهم برابر \metric{99.23\%} و دقت آزمون نهایی برابر \metric{99.34\%} گزارش شد.
+
+در فاز بلادرنگ، یک معماری ماژولار برای دریافت تصویر وب‌کم، استخراج ناحیه دست، همسان‌سازی پیش‌پردازش با مدل، استنتاج روی \eng{CPU/GPU}، تثبیت زمانی پیش‌بینی، مدیریت فرمان‌های ویرایشی، تشخیص پایان رشته و پخش صوت با \eng{pyttsx3} ایجاد شد. علامت تنها زمانی ثبت می‌شود که با اطمینان حداقل \metric{80\%} برای \metric{۲ ثانیه} پایدار بماند؛ کلاس \eng{NOTHING} پس از \metric{۰.۴ ثانیه} قفل علامت قبلی را آزاد و پس از \metric{۵ ثانیه} متن موجود را نهایی می‌کند. کد با تست‌های واحد برای اجزای اصلی و کنترل کیفیت با \eng{pytest} و \eng{Ruff} همراه شده است.
+
+\begin{infobox}[دامنه سامانه]
+سامانه حاضر یک مترجم حروف‌به‌حروف مبتنی بر \eng{fingerspelling} است. بنابراین خروجی آن از توالی کلاس‌های ایستا ساخته می‌شود و جایگزین یک مدل کامل ترجمه زبان اشاره طبیعیِ پیوسته، شامل حرکات پویا و دستور زبان مستقل زبان اشاره، نیست.
+\end{infobox}
+
+\tableofcontents
+\listoffigures
+\listoftables
+\clearpage
+\pagenumbering{arabic}
+
+% ==================== Chapter 1 ====================
+\chapter{تعریف مسئله، اهداف و معیارهای تحویل}
+
+\section{بیان مسئله}
+هدف پروژه توسعه یک سیستم کامل هوش مصنوعی از مرحله شناخت داده خام تا استقرار در یک محیط کاربردی بلادرنگ است. ورودی سیستم فریم‌های دوربین و خروجی آن متن حروف‌چینی‌شده و صوت متن نهایی است. مسئله اصلی را می‌توان به سه زیرمسئله تقسیم کرد:
+\begin{enumerate}
+  \item تحلیل و استانداردسازی تصاویر کلاس‌بندی‌شده زبان اشاره؛
+  \item آموزش یک طبقه‌بند \eng{CNN} برای تشخیص یکی از ۲۹ کلاس؛
+  \item طراحی منطق زمانی برای تبدیل پیش‌بینی‌های فریم‌به‌فریم به رشته پایدار و قابل خواندن.
+\end{enumerate}
+
+\section{اهداف فنی}
+\begin{itemize}
+  \item بررسی توازن کلاس‌ها، ویژگی‌های تصویر و توزیع داده؛
+  \item طراحی شبکه شامل لایه‌های \eng{Convolution}، \eng{MaxPooling} و \eng{Fully Connected}؛
+  \item کاهش بیش‌برازش با افزایش داده، \eng{Dropout} و تنظیم نرخ یادگیری؛
+  \item دریافت تصویر با \eng{OpenCV} و محدودسازی ورودی مدل به یک ناحیه مربعی؛
+  \item ثبت علامت تنها پس از تشخیص پایدار برای جلوگیری از نویز لحظه‌ای؛
+  \item پشتیبانی از فرمان‌های \eng{SPACE}، \eng{DEL} و \eng{NOTHING}؛
+  \item تبدیل رشته نهایی به گفتار و آماده‌سازی سیستم برای عبارت بعدی؛
+  \item جداسازی اجزا و فراهم‌کردن تست‌های واحد برای توسعه و نگه‌داری مطمئن.
+\end{itemize}
+
+\section{تطبیق الزامات صورت پروژه با خروجی نهایی}
+\begin{table}[H]
+\centering
+\caption{پوشش الزامات اصلی پروژه}
+\begin{tabularx}{\textwidth}{R{3.2cm}Y C{2.5cm}}
+\toprule
+\textbf{فاز} & \textbf{الزام} & \textbf{وضعیت} \\
+\midrule
+فاز ۱ & شمارش نمونه‌ها و بررسی توازن ۲۹ کلاس & \yes \\
+فاز ۱ & نمایش نمونه تصادفی از هر کلاس در شبکه تصویری & \yes \\
+فاز ۱ & تحلیل ابعاد، کانال رنگ و بازه پیکسل‌ها & \yes \\
+فاز ۱ & تقسیم داده به آموزش، اعتبارسنجی و آزمون & \yes \\
+فاز ۲ & طراحی و آموزش \eng{CNN} و شرح معماری & \yes \\
+فاز ۲ & بررسی اثر پارامترهایی نظیر نرخ یادگیری، اندازه دسته و بهینه‌ساز & \yes \\
+فاز ۲ & ارزیابی روی داده آزمون و گزارش دقت & \yes \\
+فاز ۲ & نمودار \eng{Accuracy} و \eng{Loss} و ماتریس درهم‌ریختگی & \yes \\
+فاز ۳ & دریافت تصویر وب‌کم، کادر دست و ارسال \eng{ROI} به مدل & \yes \\
+فاز ۳ & تثبیت علامت برای ۲ ثانیه با اطمینان بالا & \yes \\
+فاز ۳ & نهایی‌سازی بعد از ۵ ثانیه \eng{NOTHING} & \yes \\
+فاز ۳ & تبدیل متن به گفتار و پاک‌کردن رشته & \yes \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{warningbox}[نکته مهم پیش از تحویل]
+کد آموزش میانگین \eng{loss} را محاسبه می‌کند و زمان‌بند نرخ یادگیری را بر مبنای \eng{validation loss} به‌روزرسانی می‌کند، اما مقادیر تاریخی \eng{train loss} و \eng{validation loss} در خروجی نوت‌بوک ذخیره یا رسم نشده‌اند. همچنین وجود شکل نهایی ماتریس درهم‌ریختگی در خروجی متعهدشده نوت‌بوک قابل تأیید نیست. چون صورت پروژه این دو خروجی را صریحاً الزامی کرده است، پیش از تحویل باید نوت‌بوک یک‌بار با ذخیره تاریخچه زیان و رسم ماتریس درهم‌ریختگی اجرا شود. در این گزارش هیچ مقدار زیان تخمین زده نشده است.
+\end{warningbox}
+
+% ==================== Chapter 2 ====================
+\chapter{فاز اول: تحلیل اکتشافی و پیش‌پردازش داده}
+
+\section{ساختار مجموعه‌داده}
+مجموعه آموزشی شامل ۲۹ پوشه کلاس است. ۲۶ کلاس نخست حروف الفبای انگلیسی و سه کلاس آخر برای کنترل رشته در محیط بلادرنگ در نظر گرفته شده‌اند:
+\begin{center}
+\eng{A, B, C, ..., Z, del, nothing, space}
+\end{center}
+
+هر کلاس دقیقاً ۳\,۰۰۰ تصویر دارد؛ بنابراین تعداد کل تصاویر آموزشی برابر است با:
+\[
+29 \times 3000 = 87000
+\]
+در پوشه آزمون اولیه دیتاست تنها ۲۸ تصویر، هر کلاس یک تصویر، وجود داشته و کلاس \eng{del} غایب بوده است. این مجموعه آزمون کوچک برای ارزیابی آماری مدل کافی نبود؛ ازاین‌رو برای فاز آموزش یک تقسیم‌بندی جدید از تصاویر اصلی ایجاد شد.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.96\textwidth]{assets/class_distribution.png}
+\caption{توزیع کلاس‌ها در پوشه آموزشی و آزمون اولیه؛ خروجی مستقیم نوت‌بوک فاز ۱}
+\label{fig:class-dist}
+\end{figure}
+
+\section{تصویرسازی نمونه‌ها}
+شکل~\ref{fig:samples} یک تصویر تصادفی از هر یک از ۲۹ کلاس را نشان می‌دهد. تصاویر شامل دست، مچ و بخشی از ساعد هستند و پس‌زمینه ثابت و قابل‌توجهی نیز در آن‌ها دیده می‌شود. این ویژگی در زمان استقرار مهم است؛ زیرا یک شبکه کانولوشنی ممکن است علاوه بر شکل دست، از نور، زاویه و الگوی پس‌زمینه نیز سرنخ بگیرد.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.98\textwidth]{assets/sample_grid.png}
+\caption{نمونه‌ای از هر کلاس مجموعه آموزشی؛ تمام تصاویر \eng{200×200 RGB}}
+\label{fig:samples}
+\end{figure}
+
+\section{ویژگی‌های تصاویر}
+تحلیل تمام ۸۷\,۰۰۰ تصویر نتایج زیر را نشان داد:
+\begin{table}[H]
+\centering
+\caption{خلاصه ویژگی‌های تصویری داده}
+\begin{tabularx}{0.84\textwidth}{R{5cm}Y}
+\toprule
+\textbf{ویژگی} & \textbf{نتیجه} \\
+\midrule
+حالت رنگ & همه تصاویر \eng{RGB} \\
+عرض & حداقل، حداکثر و میانگین همگی \eng{200} پیکسل \\
+ارتفاع & حداقل، حداکثر و میانگین همگی \eng{200} پیکسل \\
+نسبت تصویر & ثابت و برابر \eng{1.00} \\
+بازه ذخیره‌سازی پیکسل & اعداد صحیح \eng{0--255} \\
+توازن کلاس‌ها & انحراف معیار تعداد نمونه‌ها برابر صفر \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+با وجود ثابت‌بودن اندازه داده، در هر دو مسیر آموزش و استنتاج عمل تغییر اندازه به \eng{200×200} تکرار شده است تا ورودی‌های خارج از دیتاست نیز به شکل مورد انتظار مدل تبدیل شوند.
+
+\section{تقسیم‌بندی داده}
+از کل ۸۷\,۰۰۰ تصویر، تقسیم زیر استفاده شده است:
+\begin{table}[H]
+\centering
+\caption{تقسیم‌بندی نهایی داده برای مدل‌سازی}
+\begin{tabular}{lrr}
+\toprule
+\textbf{بخش} & \textbf{تعداد تصویر} & \textbf{نسبت} \\
+\midrule
+\eng{Train} & \eng{65,250} & \eng{75\%} \\
+\eng{Validation} & \eng{13,050} & \eng{15\%} \\
+\eng{Test} & \eng{8,700} & \eng{10\%} \\
+\midrule
+جمع & \eng{87,000} & \eng{100\%} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.62\textwidth]{assets/dataset_split.png}
+\caption{نسبت بخش‌های آموزش، اعتبارسنجی و آزمون}
+\end{figure}
+
+\section{نرمال‌سازی}
+برای هر کانال، میانگین و انحراف معیار روی تصاویر آموزش محاسبه شد:
+\begin{align*}
+\boldsymbol{\mu} &= (0.5188341,\;0.4989899,\;0.5144102),\\
+\boldsymbol{\sigma} &= (0.2045820,\;0.2336411,\;0.2412035).
+\end{align*}
+پس از تبدیل پیکسل‌ها به بازه \eng{[0,1]}، هر کانال طبق رابطه زیر استاندارد شد:
+\[
+ x'_{c}=\frac{x_c-\mu_c}{\sigma_c}
+\]
+آمار محاسبه‌شده در فایل \code{dataset_stats.pt} ذخیره و عیناً در تنظیمات استنتاج بلادرنگ استفاده شده است. این همسانی برای جلوگیری از تغییر توزیع ورودی میان آموزش و اجرا ضروری است.
+
+% ==================== Chapter 3 ====================
+\chapter{فاز دوم: طراحی و آموزش شبکه عصبی پیچشی}
+
+\section{معماری مدل}
+مدل \eng{SignLanguageCNN} چهار بلوک کانولوشن و بیشینه‌گیری، یک لایه پنهان تمام‌متصل و یک لایه خروجی ۲۹کلاسه دارد. در تمام لایه‌های کانولوشن از هسته \eng{3×3}، \eng{padding=1} و تابع فعال‌ساز \eng{ReLU} استفاده شده است. هر بلوک با \eng{MaxPool 2×2} ابعاد مکانی را نصف می‌کند.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  node distance=5mm and 4mm,
+  block/.style={draw=Primary,thick,rounded corners=2mm,fill=SoftBlue,minimum height=10mm,minimum width=20mm,align=center,font=\latinfont\scriptsize},
+  pool/.style={draw=Secondary,thick,rounded corners=2mm,fill=SoftGreen,minimum height=10mm,minimum width=17mm,align=center,font=\latinfont\scriptsize},
+  dense/.style={draw=Accent,thick,rounded corners=2mm,fill=SoftPink,minimum height=10mm,minimum width=20mm,align=center,font=\latinfont\scriptsize},
+  arrow/.style={-{Stealth[length=2mm]},thick,DarkGray}
+]
+\begin{latin}
+\node[block] (in) {Input\\$3\times200\times200$};
+\node[block,right=of in] (c1) {Conv1 + ReLU\\32 channels};
+\node[pool,right=of c1] (p1) {\lr{Pool}\\$32\times100\times100$};
+\node[block,right=of p1] (c2) {Conv2 + ReLU\\64 channels};
+\node[pool,right=of c2] (p2) {\lr{Pool}\\$64\times50\times50$};
+\node[block,below=9mm of p2] (c3) {Conv3 + ReLU\\128 channels};
+\node[pool,left=of c3] (p3) {\lr{Pool}\\$128\times25\times25$};
+\node[block,left=of p3] (c4) {Conv4 + ReLU\\256 channels};
+\node[pool,left=of c4] (p4) {\lr{Pool}\\$256\times12\times12$};
+\node[dense,left=of p4] (fc1) {Flatten + FC\\$36864\rightarrow512$};
+\node[dense,left=of fc1] (drop) {Dropout\\$p=0.5$};
+\node[dense,left=of drop] (out) {FC Output\\29 logits};
+\draw[arrow] (in)--(c1); \draw[arrow] (c1)--(p1); \draw[arrow] (p1)--(c2); \draw[arrow] (c2)--(p2);
+\draw[arrow] (p2)--(c3); \draw[arrow] (c3)--(p3); \draw[arrow] (p3)--(c4); \draw[arrow] (c4)--(p4);
+\draw[arrow] (p4)--(fc1); \draw[arrow] (fc1)--(drop); \draw[arrow] (drop)--(out);
+\end{latin}
+\end{tikzpicture}
+\caption{معماری شبکه \eng{SignLanguageCNN}}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\caption{جزئیات لایه‌ها و تعداد پارامترهای قابل آموزش}
+\begin{tabularx}{\textwidth}{l C{2.8cm} C{2.8cm} r Y}
+\toprule
+\textbf{لایه} & \textbf{ورودی} & \textbf{خروجی پس از \eng{Pool}} & \textbf{پارامتر} & \textbf{توضیح} \\
+\midrule
+\eng{Conv1} & \eng{3×200×200} & \eng{32×100×100} & \eng{896} & استخراج لبه‌ها و الگوهای ابتدایی \\
+\eng{Conv2} & \eng{32×100×100} & \eng{64×50×50} & \eng{18,496} & ترکیب ویژگی‌های سطح پایین \\
+\eng{Conv3} & \eng{64×50×50} & \eng{128×25×25} & \eng{73,856} & یادگیری الگوهای پیچیده‌تر شکل دست \\
+\eng{Conv4} & \eng{128×25×25} & \eng{256×12×12} & \eng{295,168} & تولید نمایش فشرده سطح بالا \\
+\eng{FC1} & \eng{36,864} & \eng{512} & \eng{18,874,880} & تبدیل ویژگی‌های مکانی به نمایش طبقه‌بندی \\
+\eng{FC2} & \eng{512} & \eng{29} & \eng{14,877} & تولید لاجیت هر کلاس \\
+\midrule
+\multicolumn{3}{r}{\textbf{مجموع}} & \eng{19,278,173} & \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+بخش عمده پارامترهای مدل در لایه \eng{FC1} قرار دارد. این انتخاب ظرفیت طبقه‌بندی بالایی ایجاد می‌کند، اما هزینه حافظه و ریسک بیش‌برازش را نیز افزایش می‌دهد. وجود \eng{Dropout} و افزایش داده برای کنترل این ریسک اهمیت دارد.
+
+\section{افزایش داده و کنترل بیش‌برازش}
+تبدیلات مسیر آموزش عبارت‌اند از:
+\begin{itemize}
+  \item تغییر اندازه به \eng{200×200}؛
+  \item چرخش تصادفی تا \lr{$\pm 10^\circ$}؛
+  \item وارونگی افقی تصادفی؛
+  \item تغییر جزئی روشنایی و کنتراست با شدت \eng{0.1}؛
+  \item تبدیل به تنسور و نرمال‌سازی با آمار داده آموزش.
+\end{itemize}
+برای اعتبارسنجی و آزمون تنها تغییر اندازه، تبدیل به تنسور و نرمال‌سازی انجام می‌شود تا معیارها روی داده بدون اغتشاش تصادفی محاسبه شوند.
+
+\begin{successbox}[تکنیک‌های استفاده‌شده برای بهبود تعمیم]
+در معماری نهایی دو مورد از پیشنهادهای بخش امتیازی صورت پروژه پیاده‌سازی شده است: \eng{Data Augmentation} و \eng{Dropout}. همچنین \eng{ReduceLROnPlateau} برای کاهش نرخ یادگیری در صورت توقف بهبود زیان اعتبارسنجی به کار رفته است. \eng{Batch Normalization} و اتصالات میانبر در نسخه فعلی استفاده نشده‌اند.
+\end{successbox}
+
+\section{پارامترهای آموزش}
+\begin{table}[H]
+\centering
+\caption{ابرپارامترهای آموزش}
+\begin{tabularx}{0.86\textwidth}{R{5.2cm}Y}
+\toprule
+\textbf{پارامتر} & \textbf{مقدار} \\
+\midrule
+تعداد دوره & \eng{10} \\
+اندازه دسته & \eng{64} \\
+نرخ یادگیری اولیه & \eng{0.001} \\
+بهینه‌ساز & \eng{Adam} \\
+تابع زیان & \eng{CrossEntropyLoss} \\
+زمان‌بند نرخ یادگیری & \eng{ReduceLROnPlateau} \\
+تنظیم زمان‌بند & \eng{patience=3, factor=0.5} \\
+معیار ذخیره بهترین مدل & بیشترین دقت اعتبارسنجی \\
+فایل وزن‌ها & \code{models/final_model.pth} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{روند آموزش}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\textwidth]{assets/training_accuracy.png}
+\caption{دقت آموزش و اعتبارسنجی؛ بازسازی‌شده از خروجی‌های متنی نوت‌بوک}
+\label{fig:acc}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\caption{دقت ثبت‌شده در هر دوره}
+\begin{tabular}{crr|crr}
+\toprule
+\textbf{دوره} & \textbf{آموزش} & \textbf{اعتبارسنجی} & \textbf{دوره} & \textbf{آموزش} & \textbf{اعتبارسنجی} \\
+\midrule
+1 & \eng{79.39\%} & \eng{93.24\%} & 6 & \eng{94.14\%} & \eng{98.79\%} \\
+2 & \eng{87.02\%} & \eng{96.35\%} & 7 & \eng{94.72\%} & \eng{98.70\%} \\
+3 & \eng{90.20\%} & \eng{97.36\%} & 8 & \eng{95.29\%} & \eng{98.57\%} \\
+4 & \eng{92.05\%} & \eng{98.01\%} & 9 & \eng{95.79\%} & \eng{99.23\%} \\
+5 & \eng{93.38\%} & \eng{98.80\%} & 10 & \eng{95.88\%} & \eng{98.81\%} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+بالاتربودن دقت اعتبارسنجی نسبت به دقت آموزش الزاماً نشانه خطا نیست. در زمان آموزش، تبدیلات تصادفی و \eng{Dropout} مسئله را سخت‌تر می‌کنند؛ درحالی‌که هنگام اعتبارسنجی شبکه در حالت \eng{eval} قرار دارد و ورودی‌ها بدون افزایش داده‌اند. بهترین مدل در دوره نهم ذخیره شده است.
+
+\section{ارزیابی نهایی}
+نتایج ثبت‌شده روی مجموعه آزمون ۸\,۷۰۰ تصویری عبارت‌اند از:
+\begin{table}[H]
+\centering
+\caption{نتایج نهایی مدل}
+\begin{tabularx}{0.78\textwidth}{R{5cm}Y}
+\toprule
+\textbf{معیار} & \textbf{مقدار} \\
+\midrule
+پیش‌بینی صحیح & \eng{8,643 / 8,700} \\
+دقت آزمون & \eng{99.34\%} \\
+میانگین اطمینان & \eng{98.98\%} \\
+کمینه اطمینان مشاهده‌شده & \eng{38.06\%} \\
+بهترین دقت اعتبارسنجی & \eng{99.23\%} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{infobox}[تفسیر نتیجه]
+دقت بالای آزمون نشان می‌دهد مدل الگوهای موجود در منبع داده را به‌خوبی فراگرفته است. با این حال، تقسیم آموزش/اعتبارسنجی/آزمون از تصاویر یک مجموعه همگن انجام شده است؛ بنابراین این عدد به‌تنهایی تضمین‌کننده عملکرد برابر در نور، دوربین، پس‌زمینه و دست افراد جدید نیست. آزمون بلادرنگ وب‌کم باید به‌عنوان ارزیابی جداگانه دامنه واقعی در نظر گرفته شود.
+\end{infobox}
+
+% ==================== Chapter 4 ====================
+\chapter{فاز سوم: سامانه بلادرنگ ترجمه به متن و گفتار}
+
+\section{معماری کلان}
+کد فاز سوم به‌صورت یک بسته ماژولار با چهار حوزه اصلی طراحی شده است: بینایی ماشین، استنتاج مدل، رمزگشایی زمانی و گفتار. جریان کامل داده در شکل~\ref{fig:pipeline} آمده است.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.98\textwidth}{!}{%
+\begin{tikzpicture}[
+  box/.style={draw=Primary,thick,rounded corners=2mm,fill=SoftBlue,minimum width=25mm,minimum height=13mm,align=center},
+  model/.style={draw=Accent,thick,rounded corners=2mm,fill=SoftPink,minimum width=26mm,minimum height=13mm,align=center},
+  logic/.style={draw=Secondary,thick,rounded corners=2mm,fill=SoftGreen,minimum width=29mm,minimum height=13mm,align=center},
+  arrow/.style={-{Stealth[length=3mm]},very thick,DarkGray},
+  node distance=8mm
+]
+\begin{latin}
+\node[box] (cam) {Webcam\\OpenCV};
+\node[box,right=of cam] (roi) {Mirror + Square ROI};
+\node[box,right=of roi] (pre) {Resize, RGB, Normalize\\NCHW batch};
+\node[model,right=of pre] (cnn) {PyTorch CNN\\29 logits};
+\node[model,right=of cnn] (soft) {Softmax\\Prediction};
+\node[logic,below=13mm of soft] (temp) {Temporal Decoder\\2 s hold};
+\node[logic,left=of temp] (handler) {Label Handler\\A--Z / SPACE / DEL};
+\node[logic,left=of handler] (buffer) {Text Buffer};
+\node[logic,left=of buffer] (final) {Sequence Finalizer\\5 s NOTHING};
+\node[box,left=of final] (tts) {pyttsx3\\Speech};
+\draw[arrow] (cam)--(roi); \draw[arrow] (roi)--(pre); \draw[arrow] (pre)--(cnn); \draw[arrow] (cnn)--(soft);
+\draw[arrow] (soft)--(temp); \draw[arrow] (temp)--(handler); \draw[arrow] (handler)--(buffer); \draw[arrow] (buffer)--(final); \draw[arrow] (final)--(tts);
+\end{latin}
+\end{tikzpicture}}
+\caption{زنجیره پردازش بلادرنگ از وب‌کم تا گفتار}
+\label{fig:pipeline}
+\end{figure}
+
+\section{ساختار ماژول‌ها}
+\begin{latin}
+\begin{lstlisting}[style=pythonstyle,language={},numbers=none]
+src/sign_translator/
+|-- app.py                 # orchestration and main loop
+|-- config.py              # camera/model/decoder/TTS parameters
+|-- labels.py              # canonical label order and commands
+|-- vision/
+|   |-- camera.py          # safe camera lifecycle
+|   |-- roi.py             # square region of interest
+|   `-- overlay.py         # prediction and progress UI
+|-- inference/
+|   |-- preprocessing.py   # BGR -> normalized NCHW
+|   |-- torch_model.py     # SignLanguageCNN architecture
+|   |-- torch_predictor.py # weight loading and inference
+|   |-- output_decoder.py  # logits/probabilities validation
+|   `-- factory.py         # mock or torch backend
+|-- decoding/
+|   |-- temporal_decoder.py
+|   |-- sequence_finalizer.py
+|   |-- label_handler.py
+|   `-- text_buffer.py
+`-- speech/
+    |-- factory.py
+    |-- noop.py
+    `-- pyttsx3_engine.py
+\end{lstlisting}
+\end{latin}
+
+این جداسازی باعث می‌شود مدل، موتور گفتار و منطق رابط بدون بازنویسی حلقه اصلی قابل تعویض باشند. برای مثال، \code{TimedMockPredictor} پیش از تحویل مدل واقعی امکان تست کل سامانه را فراهم کرده و سپس \code{TorchPredictor} از طریق کارخانه جایگزین آن شده است.
+
+\section{دریافت تصویر و ناحیه مورد توجه}
+کلاس \code{Camera} دوربین را به‌صورت \eng{context manager} باز و در پایان آزاد می‌کند. رزولوشن در تنظیمات روی \eng{1280×720} قرار گرفته و تصویر برای تجربه طبیعی کاربر به‌صورت افقی آینه می‌شود.
+
+ناحیه دست با نسبت‌های مستقل از رزولوشن تعریف شده است:
+\begin{align*}
+ x &= 0.55W, & y &= 0.12H,\\
+ w &= 0.38W, & h &= 0.72H.
+\end{align*}
+سپس ضلع کوچک‌تر انتخاب و کادر دقیقاً مربعی می‌شود. این اقدام از فشردگی یا کشیدگی شکل دست هنگام تبدیل به ورودی \eng{200×200} جلوگیری می‌کند.
+
+\section{همسان‌سازی پیش‌پردازش آموزش و اجرا}
+فریم \eng{OpenCV} در قالب \eng{BGR} است، درحالی‌که داده آموزشی \eng{RGB} بوده است. مسیر استنتاج مراحل زیر را انجام می‌دهد:
+\begin{enumerate}
+  \item اعتبارسنجی ورودی سه‌کاناله و غیرخالی
+  \item تغییر اندازه به \eng{200×200}
+  \item تبدیل \eng{BGR} به \eng{RGB}
+  \item تبدیل نوع به \eng{float32} و تقسیم بر \eng{255}
+  \item نرمال‌سازی کانالی با میانگین و انحراف معیار آموزش
+  \item تبدیل چیدمان از \eng{HWC} به \eng{CHW}
+  \item افزودن بعد دسته و تولید تنسور \eng{1×3×200×200}
+\end{enumerate}
+انتخاب روش درون‌یابی نیز بر اساس کوچک‌سازی یا بزرگ‌سازی انجام می‌شود: \eng{INTER\_AREA} برای کاهش اندازه و \eng{INTER\_LINEAR} برای افزایش اندازه.
+
+\section{بارگذاری مدل و استنتاج}
+\code{TorchPredictor} معماری را با تعداد خروجی برابر طول فهرست برچسب‌ها می‌سازد و فایل وزن را با \code{weights_only=True} بارگذاری می‌کند. استفاده از \code{strict=True} در \code{load_state_dict} سبب می‌شود هر ناسازگاری میان معماری و وزن‌ها به‌جای تولید نتیجه اشتباه، با خطای واضح متوقف شود.
+
+ترتیب خروجی مدل در کد به‌صورت زیر ثابت شده است:
+\begin{center}
+\eng{(A, ..., Z, DEL, NOTHING, SPACE)}
+\end{center}
+خروجی شبکه لاجیت است. \code{output_decoder.py} شکل خروجی، تعداد کلاس‌ها، مقادیر نامتناهی و تکراری‌نبودن برچسب‌ها را بررسی و سپس \eng{softmax} پایدار عددی را محاسبه می‌کند.
+
+\section{منطق تثبیت زمانی}
+پیش‌بینی خام هر فریم مستقیماً وارد متن نمی‌شود. \code{TemporalDecoder} یک ماشین حالت ساده دارد:
+\begin{itemize}
+  \item پیش‌بینی باید اطمینان حداقل \eng{0.80} داشته باشد
+  \item یک برچسب باید به‌مدت \eng{2.0 s} بدون تغییر باقی بماند
+  \item پس از ثبت، همان برچسب قفل می‌شود تا با نگه‌داشتن دست چندبار تکرار نشود
+  \item نمایش \eng{NOTHING} یا افت اطمینان به‌مدت \eng{0.4 s} قفل را آزاد می‌کند
+  \item برای تکرار دو حرف یکسان، مانند \eng{OO}، کاربر باید بین دو نمایش، حالت \eng{NOTHING} را نشان دهد
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  state/.style={draw=Primary,thick,rounded corners=3mm,fill=SoftBlue,minimum width=34mm,minimum height=13mm,align=center},
+  accept/.style={draw=Accent,thick,rounded corners=3mm,fill=SoftPink,minimum width=34mm,minimum height=13mm,align=center},
+  neutral/.style={draw=Secondary,thick,rounded corners=3mm,fill=SoftGreen,minimum width=34mm,minimum height=13mm,align=center},
+  arrow/.style={-{Stealth[length=2.5mm]},thick,DarkGray},node distance=20mm
+]
+\begin{latin}
+\node[state] (wait) {Waiting};
+\node[state,right=of wait] (cand) {Candidate\\confidence $\geq0.80$};
+\node[accept,right=of cand] (lock) {Accepted / Locked};
+\node[neutral,below=of lock] (rel) {NOTHING / low confidence\\for $0.4$ s};
+\draw[arrow] (wait) -- node[above,font=\scriptsize]{new sign} (cand);
+\draw[arrow] (cand) -- node[above,font=\scriptsize]{stable for 2 s} (lock);
+\draw[arrow] (cand) edge[bend left=30] node[below,font=\scriptsize]{label changes} (wait);
+\draw[arrow] (lock) -- (rel);
+\draw[arrow] (rel) -| (wait);
+\end{latin}
+\end{tikzpicture}
+\caption{ماشین حالت رمزگشایی زمانی}
+\end{figure}
+
+\section{تفسیر برچسب‌ها و بافر متن}
+\begin{table}[H]
+\centering
+\caption{رفتار هر نوع برچسب پذیرفته‌شده}
+\begin{tabularx}{0.84\textwidth}{C{3cm}Y}
+\toprule
+\textbf{برچسب} & \textbf{عملکرد} \\
+\midrule
+\eng{A--Z} & افزودن حرف انگلیسی بزرگ به انتهای بافر \\
+\eng{SPACE} & افزودن یک فاصله؛ فاصله ابتدایی یا تکراری نادیده گرفته می‌شود \\
+\eng{DEL} & حذف آخرین کاراکتر، شامل حرف یا فاصله \\
+\eng{NOTHING} & عدم تغییر متن؛ استفاده به‌عنوان علامت خنثی و پایان رشته \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\code{TextBuffer} به‌جای ذخیره توکن‌های کلمه، فهرست کاراکترها را نگه می‌دارد. بنابراین فرمان حذف دقیقاً آخرین کاراکتر را برمی‌گرداند و متن نهایی با حذف فاصله‌های ابتدا و انتها تولید می‌شود.
+
+\section{تشخیص پایان عبارت و تبدیل به گفتار}
+\code{SequenceFinalizer} تنها زمانی شمارنده را فعال می‌کند که:
+\begin{itemize}
+  \item برچسب \eng{NOTHING} با اطمینان حداقل \eng{0.80} تشخیص داده شود.
+  \item بافر متن خالی نباشد.
+  \item این حالت برای \eng{5.0 s} پیوسته ادامه یابد.
+\end{itemize}
+پس از تکمیل شمارنده، متن یک‌بار نهایی می‌شود، به موتور گفتار ارسال و سپس بافر پاک می‌شود. پرچم داخلی از چندبارخواندن متن در همان دوره طولانی \eng{NOTHING} جلوگیری می‌کند.
+
+موتور \eng{pyttsx3} در یک نخ کارگر اجرا می‌شود و متن‌ها را از صف دریافت می‌کند. این طراحی مانع توقف حلقه پردازش ویدئو هنگام پخش صدا می‌شود. یک پیاده‌سازی \eng{NoOp} نیز برای تست و محیط‌های فاقد صوت وجود دارد.
+
+\section{رابط تصویری}
+\code{overlay.py} اطلاعات زیر را روی فریم نشان می‌دهد:
+\begin{itemize}
+  \item کادر سبز ناحیه دست
+  \item برچسب پیش‌بینی‌شده و درصد اطمینان
+  \item درصد پیشرفت نگه‌داشتن علامت
+  \item وضعیت قفل، پذیرش یا آزادشدن علامت
+  \item درصد پیشرفت نهایی‌سازی متن
+  \item متن جاری و آخرین متن نهایی‌شده
+  \item راهنمای خروج با کلیدهای \eng{Q} یا \eng{ESC}
+\end{itemize}
+
+% ==================== Chapter 5 ====================
+\chapter{اعتبارسنجی نرم‌افزار و کیفیت پیاده‌سازی}
+
+\section{مجموعه تست‌ها}
+پوشه \code{tests} اجزای زیر را پوشش می‌دهد:
+\begin{table}[H]
+\centering
+\caption{حوزه‌های تحت آزمون واحد}
+\begin{tabularx}{\textwidth}{R{5cm}Y}
+\toprule
+\textbf{فایل تست} & \textbf{رفتارهای بررسی‌شده} \\
+\midrule
+\code{test_roi.py} & محاسبه کادر، برش تصویر و مربعی‌بودن ناحیه ورودی \\
+\code{test_preprocessing.py} & شکل \eng{NCHW}، تبدیل رنگ، نوع داده و نرمال‌سازی کانال‌ها \\
+\code{test_torch_model.py} & تولید ۲۹ لاجیت برای دسته ورودی \eng{200×200} \\
+\code{test_torch_predictor.py} & اتصال پیش‌پردازش به مدل ساختگی، نگاشت خروجی و مدیریت فایل مفقود \\
+\code{test_output_decoder.py} & لاجیت، احتمال، \eng{softmax}، تعداد کلاس و مقادیر نامعتبر \\
+\code{test_temporal_decoder.py} & شرط دوثانیه‌ای، جلوگیری از تکرار، آزادشدن و آستانه اطمینان \\
+\code{test_sequence_finalizer.py} & شرط پنج‌ثانیه‌ای، عدم نهایی‌سازی تکراری و بافر خالی \\
+\code{test_label_handler.py} & رفتار حروف، فاصله، حذف، \eng{NOTHING} و برچسب ناشناخته \\
+\code{test_text_buffer.py} & افزودن، حذف، فاصله، پاک‌سازی و متن نهایی \\
+\code{test_mock_predictor.py} & صحت خروجی پیش‌بینی‌کننده ساختگی \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+تیم پروژه اجرای موفق تمام تست‌های موجود و بدون خطای بررسی \eng{Ruff} را در محیط توسعه گزارش کرده است. تنظیمات \eng{Ruff} نوت‌بوک‌ها را از تحلیل کد پایتون حذف می‌کند، زیرا خروجی و ساختار سلولی نوت‌بوک الزاماً قواعد یک ماژول تولیدی را رعایت نمی‌کند.
+
+\section{مدیریت خطا}
+موارد زیر با خطاهای اختصاصی یا پیام‌های واضح کنترل شده‌اند:
+\begin{itemize}
+  \item بازنشدن دوربین یا شکست در خواندن فریم
+  \item نبودن فایل مدل یا ناسازگاری وزن‌ها با معماری
+  \item درخواست \eng{CUDA} در سیستم فاقد \eng{CUDA}
+  \item تصویر خالی، تعداد کانال اشتباه یا آمار نرمال‌سازی نامعتبر
+  \item خروجی مدل با شکل نامعتبر، تعداد کلاس اشتباه یا مقادیر \eng{NaN/Inf}
+  \item برچسب خالی، تکراری یا ناشناخته
+  \item زمان‌های غیرصعودی در ماشین‌های حالت
+\end{itemize}
+
+\section{قابلیت تعویض اجزا}
+دو کارخانه مجزا برای پیش‌بینی و گفتار وجود دارد. در مسیر پیش‌بینی، حالت \eng{mock} برای توسعه و حالت \eng{torch} برای مدل نهایی انتخاب می‌شود. در مسیر صوت نیز \eng{noop} و \eng{pyttsx3} قابل انتخاب هستند. این الگو تست‌پذیری را افزایش و وابستگی مستقیم حلقه اصلی به کتابخانه‌ها را کاهش داده است.
+
+% ==================== Chapter 6 ====================
+\chapter{تحلیل محدودیت‌ها و پیشنهادهای بهبود}
+
+\section{شکاف دامنه میان دیتاست و وب‌کم}
+داده آموزشی از محیط، زاویه و نور نسبتاً همگنی برخوردار است. عملکرد \eng{99.34\%} روی تقسیم داخلی همان منبع، دقت روی دوربین و فرد جدید را تضمین نمی‌کند. کلاس‌های بصری نزدیک مانند \eng{O/C/Q} یا \eng{V/U/W} معمولاً به زاویه انگشتان و وضوح مرزها حساس‌اند.
+
+\section{حروف و حرکات پویا}
+مدل ورودی تک‌فریم دارد؛ در نتیجه حرکت زمانی را مستقیماً مدل نمی‌کند. برخی حروف زبان اشاره مانند \eng{J} و \eng{Z} در اجرای طبیعی شامل مسیر حرکتی‌اند. مدل ممکن است یک وضعیت ثابت از این حرکت را طبقه‌بندی کند، اما برای شناخت صحیح حرکت، استفاده از دنباله فریم و معماری‌هایی مانند \eng{3D-CNN}، \eng{LSTM} یا \eng{Transformer} مناسب‌تر است.
+
+% ==================== Chapter 7 ====================
+\chapter{راهنمای اجرا و ساختار تحویل}
+
+\section{نصب}
+\begin{latin}
+\begin{lstlisting}[style=pythonstyle,language=bash,numbers=none]
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -e ".[dev,tts,model]"
+\end{lstlisting}
+\end{latin}
+
+برای نصب \eng{PyTorch} سازگار با کارت گرافیک، درایور و نسخه \eng{CUDA} باید از بسته مناسب سیستم استفاده شود. در صورت نبود \eng{CUDA}، مقدار \code{device="auto"} به‌صورت خودکار \eng{CPU} را انتخاب می‌کند.
+
+\section{اجرای کنترل کیفیت}
+\begin{latin}
+\begin{lstlisting}[style=pythonstyle,language=bash,numbers=none]
+pytest
+ruff check .
+\end{lstlisting}
+\end{latin}
+
+\section{اجرای سامانه}
+فایل وزن باید در مسیر زیر قرار داشته باشد:
+\begin{center}
+\code{models/final_model.pth}
+\end{center}
+سپس برنامه از ریشه پروژه اجرا می‌شود:
+\begin{latin}
+\begin{lstlisting}[style=pythonstyle,language=bash,numbers=none]
+python main.py
+\end{lstlisting}
+\end{latin}
+
+\section{ساختار فایل نهایی تحویل}
+طبق دستور پروژه، تمام محتوا باید در یک فایل فشرده با الگوی نام‌گذاری تعیین‌شده قرار گیرد:
+\begin{latin}
+\begin{lstlisting}[style=pythonstyle,language={},numbers=none]
+AI-Project3-StudentID1-StudentID2.zip
+|-- main.py
+|-- pyproject.toml
+|-- models/
+|   `-- final_model.pth
+|-- notebooks/
+|   |-- phase1&2.ipynb
+|   `-- dataset_stats.pt
+|-- reports/
+|   |-- report.pdf
+|   `-- report.tex
+|-- src/sign_translator/
+|-- tests/
+|-- README.md
+`-- LICENSE
+\end{lstlisting}
+\end{latin}
+
+% ==================== Chapter 8 ====================
+\chapter{نتیجه‌گیری}
+پروژه حاضر سه بخش داده، مدل و محصول بلادرنگ را در یک زنجیره یکپارچه قرار داده است. فاز اول نشان داد داده آموزشی از نظر تعداد کلاس‌ها، اندازه تصویر و حالت رنگ ساختاری منظم دارد. در فاز دوم، شبکه چهاربخشی \eng{CNN} با افزایش داده و \eng{Dropout} به دقت آزمون \eng{99.34\%} رسید. در فاز سوم، مدل از محیط نوت‌بوک خارج و در یک برنامه واقعی مبتنی بر وب‌کم، رمزگشایی زمانی، ویرایش متن و تبدیل به گفتار به کار گرفته شد.
+
+نقطه قوت اصلی پیاده‌سازی، جداسازی مسئولیت‌ها و توسعه افزایشی بر اساس قرارداد پیش‌بینی است. کد وب‌کم و منطق متن پیش از آماده‌شدن مدل با پیش‌بینی‌کننده ساختگی تکمیل شد و پس از تحویل وزن‌های \eng{PyTorch}، تنها لایه استنتاج جایگزین گردید. استفاده از تست‌های واحد و اعتبارسنجی صریح داده‌ها نیز ریسک خطاهای خاموش در اتصال مدل را کاهش داده است.
+
+% ==================== Appendices ====================
+\appendix
+\chapter{تنظیمات نهایی سامانه}
+\begin{table}[H]
+\centering
+\caption{مقادیر پیش‌فرض تنظیمات اجرایی}
+\begin{tabularx}{\textwidth}{R{5.2cm}Y}
+\toprule
+\textbf{تنظیم} & \textbf{مقدار} \\
+\midrule
+رزولوشن دوربین & \eng{1280×720} \\
+آینه‌سازی & فعال \\
+اندازه ورودی مدل & \eng{200×200×3} \\
+ترتیب رنگ & \eng{RGB} \\
+چیدمان تنسور & \eng{NCHW} \\
+مدل & \code{models/final_model.pth} \\
+دستگاه & \eng{auto} (\eng{CUDA} در صورت امکان، در غیر این صورت \eng{CPU}) \\
+آستانه ثبت علامت & \eng{0.80} \\
+زمان تثبیت علامت & \eng{2.0 s} \\
+زمان آزادسازی قفل & \eng{0.4 s} \\
+زمان نهایی‌سازی & \eng{5.0 s} \\
+موتور گفتار & \eng{pyttsx3} \\
+کلیدهای خروج & \eng{Q} و \eng{ESC} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\chapter{قرارداد وزن‌های مدل}
+فایل وزن ذخیره‌شده یک \eng{OrderedDict} شامل ۱۲ تنسور پارامتر است. ابعاد مشاهده‌شده در آزمون بارگذاری عبارت‌اند از:
+\begin{latin}
+\begin{lstlisting}[style=pythonstyle,language={},numbers=none]
+conv1.weight                 (32, 3, 3, 3)
+conv1.bias                   (32,)
+conv2.weight                 (64, 32, 3, 3)
+conv2.bias                   (64,)
+conv3.weight                 (128, 64, 3, 3)
+conv3.bias                   (128,)
+conv4.weight                 (256, 128, 3, 3)
+conv4.bias                   (256,)
+fully_connected1.weight      (512, 36864)
+fully_connected1.bias        (512,)
+fully_connected2.weight      (29, 512)
+fully_connected2.bias        (29,)
+\end{lstlisting}
+\end{latin}
+این ابعاد با معماری گزارش‌شده و تعداد پارامتر کل مدل سازگارند.
+
+\end{document}

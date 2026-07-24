@@ -26,7 +26,11 @@ models/*
 
 # Generated reports
 reports/*
-!reports/.gitkeep
+!reports/
+!reports/**/*.tex
+!reports/assets/
+!reports/assets/**
+!reports/report.pdf
 
 # Others
 *.egg-info/
