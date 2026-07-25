@@ -39,21 +39,73 @@
 \newcommand{\UniversityLogo}{assets/sharif_logo_blue.png}
 
 % ---------- Fonts ----------
-\settextfont[
-  BoldFont={B Nazanin},
-  ItalicFont={B Nazanin},
-  BoldItalicFont={B Nazanin},
-  Scale=1.16
-]{B Nazanin}
-\newfontfamily\TitleFont[
-  BoldFont={B Titr},
-  Scale=1.02
-]{B Titr}
-\newfontfamily\MetricFont[
-  Script=Arabic,
-  BoldFont={B Nazanin},
-  Scale=1.16
-]{B Nazanin}
+% XeLaTeX only. The file first tries locally bundled fonts, then installed fonts,
+% and finally open fallback fonts so compilation never stops at font loading.
+% Put the two font files in a folder named "fonts" next to this .tex file.
+% Common filenames are detected automatically.
+
+\newcommand{\SetupNazaninFromFile}[2]{%
+  \settextfont[
+    Path={#1},
+    UprightFont={#2},
+    BoldFont={#2},
+    ItalicFont={#2},
+    BoldItalicFont={#2},
+    Script=Arabic,
+    Scale=1.16
+  ]{#2}%
+  \newfontfamily\MetricFont[
+    Path={#1},
+    UprightFont={#2},
+    BoldFont={#2},
+    Script=Arabic,
+    Scale=1.16
+  ]{#2}%
+}
+
+\newcommand{\SetupTitrFromFile}[2]{%
+  \newfontfamily\TitleFont[
+    Path={#1},
+    UprightFont={#2},
+    BoldFont={#2},
+    Script=Arabic,
+    Scale=1.02
+  ]{#2}%
+}
+
+% Text font: local file -> installed family -> fallback.
+\IfFileExists{fonts/BNAZANIN.TTF}{%
+  \SetupNazaninFromFile{fonts/}{BNAZANIN.TTF}%
+}{\IfFileExists{fonts/BNazanin.ttf}{%
+  \SetupNazaninFromFile{fonts/}{BNazanin.ttf}%
+}{\IfFileExists{BNAZANIN.TTF}{%
+  \SetupNazaninFromFile{}{BNAZANIN.TTF}%
+}{\IfFontExistsTF{B Nazanin}{%
+  \settextfont[
+    BoldFont={B Nazanin},ItalicFont={B Nazanin},BoldItalicFont={B Nazanin},
+    Script=Arabic,Scale=1.16
+  ]{B Nazanin}%
+  \newfontfamily\MetricFont[
+    BoldFont={B Nazanin},Script=Arabic,Scale=1.16
+  ]{B Nazanin}%
+}{%
+  \settextfont[Script=Arabic,Scale=1.05]{DejaVu Sans}%
+  \newfontfamily\MetricFont[Script=Arabic,Scale=1.05]{DejaVu Sans}%
+}}}}
+
+% Heading font: local file -> installed family -> fallback.
+\IfFileExists{fonts/BTITRBD.TTF}{%
+  \SetupTitrFromFile{fonts/}{BTITRBD.TTF}%
+}{\IfFileExists{fonts/BTITR.TTF}{%
+  \SetupTitrFromFile{fonts/}{BTITR.TTF}%
+}{\IfFileExists{BTITRBD.TTF}{%
+  \SetupTitrFromFile{}{BTITRBD.TTF}%
+}{\IfFontExistsTF{B Titr}{%
+  \newfontfamily\TitleFont[BoldFont={B Titr},Script=Arabic,Scale=1.02]{B Titr}%
+}{%
+  \newfontfamily\TitleFont[Script=Arabic,Scale=0.95]{DejaVu Sans}%
+}}}}
+
 \setlatintextfont[Scale=0.92]{DejaVu Sans}
 \setmonofont[Scale=0.84]{DejaVu Sans Mono}
 
@@ -159,6 +211,20 @@
 \newcommand{\yes}{\textcolor{Secondary}{\bfseries انجام‌شده}}
 \newcommand{\partialdone}{\textcolor{Warm}{\bfseries نیازمند تکمیل}}
 
+% Compile even when optional report figures have not been copied next to the .tex file.
+% As soon as the referenced file exists, the real image is used automatically.
+\newcommand{\safeincludegraphics}[2][]{%
+  \IfFileExists{#2}{\includegraphics[#1]{#2}}{%
+    \begingroup
+    \setlength{\fboxsep}{6pt}%
+    \fbox{\parbox[c][3.2cm][c]{0.78\linewidth}{%
+      \centering\small\textcolor{DarkGray}{تصویر یافت نشد}\\[3pt]
+      \scriptsize\lr{\detokenize{#2}}%
+    }}%
+    \endgroup
+  }%
+}
+
 \begin{document}
 \setRTL
 % Reapply heading styles after the bidi/xepersian patches are loaded
@@ -193,7 +259,7 @@
 
   \node[fill=white,draw=white,minimum size=2.35cm,circle,inner sep=4mm]
     at ([xshift=-2.35cm,yshift=-2.35cm]current page.north east)
-    {\includegraphics[width=1.65cm]{\UniversityLogo}};
+    {\IfFileExists{\UniversityLogo}{\includegraphics[width=1.65cm]{\UniversityLogo}}{\TitleFont\fontsize{20}{24}\selectfont\textcolor{Primary}{ش}}};
   \node[anchor=east,text=white,font=\TitleFont\fontsize{18}{25}\selectfont]
     at ([xshift=-4.0cm,yshift=-1.95cm]current page.north east) {\UniversityName};
   \node[anchor=east,text=white!85,font=\fontsize{12}{18}\selectfont]
@@ -239,10 +305,6 @@
 در فاز مدل‌سازی، یک شبکه عصبی پیچشی چهاربخشی با \metric{۱۹\,۲۷۸\,۱۷۳} پارامتر طراحی و با چارچوب \eng{PyTorch} آموزش داده شد. داده‌ها با نسبت‌های \metric{۷۵/۱۵/۱۰} به آموزش، اعتبارسنجی و آزمون تقسیم شدند. مدل با بهینه‌ساز \eng{Adam}، نرخ یادگیری \eng{0.001}، اندازه دسته \eng{64} و به‌مدت \eng{10} دوره آموزش دید. بهترین دقت اعتبارسنجی در دوره نهم برابر \metric{99.23\%} و دقت آزمون نهایی برابر \metric{99.34\%} گزارش شد.
 
 در فاز بلادرنگ، یک معماری ماژولار برای دریافت تصویر وب‌کم، استخراج ناحیه دست، همسان‌سازی پیش‌پردازش با مدل، استنتاج روی \eng{CPU/GPU}، تثبیت زمانی پیش‌بینی، مدیریت فرمان‌های ویرایشی، تشخیص پایان رشته و پخش صوت با \eng{pyttsx3} ایجاد شد. علامت تنها زمانی ثبت می‌شود که با اطمینان حداقل \metric{80\%} برای \metric{۲ ثانیه} پایدار بماند؛ کلاس \eng{NOTHING} پس از \metric{۰.۴ ثانیه} قفل علامت قبلی را آزاد و پس از \metric{۵ ثانیه} متن موجود را نهایی می‌کند. کد با تست‌های واحد برای اجزای اصلی و کنترل کیفیت با \eng{pytest} و \eng{Ruff} همراه شده است.
-
-\begin{infobox}[دامنه سامانه]
-سامانه حاضر یک مترجم حروف‌به‌حروف مبتنی بر \eng{fingerspelling} است. بنابراین خروجی آن از توالی کلاس‌های ایستا ساخته می‌شود و جایگزین یک مدل کامل ترجمه زبان اشاره طبیعیِ پیوسته، شامل حرکات پویا و دستور زبان مستقل زبان اشاره، نیست.
-\end{infobox}
 
 \tableofcontents
 \listoffigures
@@ -314,7 +376,7 @@
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.96\textwidth]{assets/train_distribution.png}
+\safeincludegraphics[width=0.96\textwidth]{assets/class_distribution.png}
 \caption{توزیع کلاس‌ها در پوشه آموزشی}
 \label{fig:train-dist}
 \end{figure}
@@ -324,13 +386,13 @@
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.98\textwidth]{assets/sample_grid.png}
+\safeincludegraphics[width=0.98\textwidth]{assets/sample_grid.png}
 \caption{نمونه‌ای از هر کلاس مجموعه آموزشی؛ تمام تصاویر \eng{200×200 RGB}}
 \label{fig:samples}
 \end{figure}
 
 \section{ویژگی‌های تصاویر}
-تحلیل تمام ۸۷\,۰۰۰ تصویر نتایج زیر را نشان داد:
+تحلیل تمام  87000تصویر نتایج زیر را نشان داد:
 \begin{table}[H]
 \centering
 \caption{خلاصه ویژگی‌های تصویری داده}
@@ -375,7 +437,7 @@
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.62\textwidth]{assets/dataset_split.png}
+\safeincludegraphics[width=0.62\textwidth]{assets/dataset_split.png}
 \caption{نسبت بخش‌های آموزش، اعتبارسنجی و آزمون}
 \end{figure}
 
@@ -531,7 +593,7 @@ x'_{c} = \frac{x_c - \mu_c}{\sigma_c}
 
 نرخ یادگیری اولیه ۰.۰۰۱ با بهینه‌ساز \eng{Adam} انتخاب شده است. تابع زیان \eng{CrossEntropyLoss} برای مسائل طبقه‌بندی چندکلاسه مناسب است و خروجی مدل (لاجیت‌ها) را با برچسب‌های یک‌داغ (One-Hot) مقایسه می‌کند. زمان‌بند \eng{ReduceLROnPlateau} در صورت عدم بهبود زیان اعتبارسنجی به مدت ۳ دوره، نرخ یادگیری را به اندازه ضریب ۰.۵ کاهش می‌دهد. این کار به مدل کمک می‌کند تا در نقاط بهینه محلی گیر نکند و به نقاط بهینه سراسری نزدیک‌تر شود. اندازه دسته ۶۴ با توجه به حافظه \eng{GPU} و تعادل بین سرعت و پایداری گرادیان انتخاب شده است. بهترین مدل بر اساس بیشترین دقت اعتبارسنجی انتخاب و در فایل \code{models/final_model.pth} ذخیره شده است.
 
-\subsection{انتخاب بهینه‌ساز Adam}
+\subsection{انتخاب بهینه‌ساز}
 
 بهینه‌ساز Adam به دلیل مزایای زیر برای آموزش مدل انتخاب شده است:
 
@@ -548,7 +610,7 @@ x'_{c} = \frac{x_c - \mu_c}{\sigma_c}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.88\textwidth]{assets/training_accuracy.png}
+\safeincludegraphics[width=0.88\textwidth]{assets/training_accuracy.png}
 \caption{دقت آموزش و اعتبارسنجی}
 \label{fig:acc}
 \end{figure}
@@ -599,8 +661,8 @@ x'_{c} = \frac{x_c - \mu_c}{\sigma_c}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.9\textwidth]{assets/confusion_matrix.png}
-\caption{ماتریس درهم‌ریختگی (Confusion Matrix) روی مجموعه آزمون}
+\safeincludegraphics[width=0.9\textwidth]{assets/confusion_matrix.png}
+\caption{ماتریس درهم‌ریختگی روی مجموعه آزمون}
 \label{fig:confusion}
 \end{figure}
 

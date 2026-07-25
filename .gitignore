@@ -35,3 +35,10 @@ reports/*
 # Others
 *.egg-info/
 *.egg-info
+
+# Added data for testing
+data
+
+# Scripts for prepairing data
+prepare_webcam_test.py
+evaluate_image_frames.py
