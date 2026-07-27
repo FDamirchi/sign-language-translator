@@ -63,7 +63,6 @@ class Camera:
 
         if not success or frame is None: # type: ignore
             raise CameraError("Could not read a frame from the camera")
-
         return frame # type: ignore
 
     def release(self) -> None:
