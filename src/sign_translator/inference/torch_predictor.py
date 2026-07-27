@@ -55,10 +55,10 @@ class TorchPredictor:
         image: NDArray[np.uint8],
     ) -> Prediction:
         preprocessed = preprocess_bgr_image(
-            image,
-            self._input_config,
-            mean=self._mean,
-            std=self._std,
+        image,
+        self._input_config,
+        mean=self._mean,
+        std=self._std
         )
 
         batch = torch.from_numpy(preprocessed.batch).to( # type: ignore

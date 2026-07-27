@@ -23,12 +23,39 @@ class PreprocessedImage:
         return self.batch[0]
 
 
+def adjust_lighting_to_dataset(image: NDArray[np.uint8]) -> NDArray[np.uint8]:
+    """
+    تنظیم نور و رنگ تصویر به شرایط دیتاست (نور زرد کمرنگ و یکنواخت)
+    """
+    # تبدیل به HSV برای کنترل نور
+    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    
+    # افزایش روشنایی (مشابه نور زرد کمرنگ دیتاست)
+    hsv[:, :, 2] = cv2.add(hsv[:, :, 2], 20)  # افزایش روشنایی
+    
+    # کاهش اشباع (برای یکنواخت‌تر شدن)
+    hsv[:, :, 1] = cv2.add(hsv[:, :, 1], -10)  # کاهش اشباع
+    
+    # بازگشت به BGR
+    image_adjusted = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
+    
+    # تنظیم دمای رنگ به سمت زرد/گرم
+    image_adjusted = cv2.addWeighted(
+        image_adjusted, 0.85,
+        np.full(image_adjusted.shape, (10, 20, 30), dtype=np.uint8),
+        0.15, 0
+    )
+    
+    return image_adjusted
+
+
 def preprocess_bgr_image(
     image: NDArray[np.uint8],
     config: ModelInputConfig | None = None,
     *,
     mean: Sequence[float],
     std: Sequence[float],
+    adjust_lighting: bool = True,  # پارامتر جدید
 ) -> PreprocessedImage:
     input_config = config or ModelInputConfig()
 
@@ -51,6 +78,9 @@ def preprocess_bgr_image(
         std=std,
         channels=input_config.channels,
     )
+
+    if adjust_lighting:
+        image = adjust_lighting_to_dataset(image)
 
     resized = cv2.resize(
         image,
