@@ -553,9 +553,9 @@ x'_{c} = \frac{x_c - \mu_c}{\sigma_c}
 \section{افزایش داده و کنترل بیش‌برازش}
 
 به منظور افزایش قدرت تعمیم‌دهی مدل و جلوگیری از بیش‌برازش، از مجموعه‌ای از تبدیلات تصادفی در مرحله آموزش استفاده شده است. این تبدیلات شامل تغییر اندازه به \eng{200×200}، چرخش تصادفی تا \lr{$\pm 10^\circ$}، وارونگی افقی تصادفی و تغییر جزئی روشنایی و کنتراست با شدت \eng{0.15} است. 
-
 لازم به ذکر است که در نسخه نهایی پیاده‌سازی، به دلیل تأثیر منفی وارونگی افقی روی برخی کلاس‌های نامتقارن مانند \eng{Z}، \eng{J}، \eng{R} و \eng{P}، این تبدیل از فرآیند آموزش حذف شده است. با حذف این تبدیل، دقت مدل روی کلاس‌های مذکور بهبود قابل‌توجهی نشان داد. بنابراین تبدیلات نهایی اعمال‌شده در مرحله آموزش به شرح زیر است:
 
+\begin{latin}
 \begin{lstlisting}[language=Python]
 transform_train = transforms.Compose([
     transforms.Resize((200, 200)),
@@ -565,9 +565,11 @@ transform_train = transforms.Compose([
     transforms.Normalize(mean=mean, std=std)
 ])
 \end{lstlisting}
+\end{latin}
 
 پس از اعمال این تبدیلات، تصاویر به تنسور تبدیل شده و با استفاده از آمار محاسبه‌شده از داده‌های آموزش (میانگین و انحراف معیار هر کانال) نرمال‌سازی می‌شوند. برای داده‌های اعتبارسنجی و آزمون، تنها تغییر اندازه، تبدیل به تنسور و نرمال‌سازی انجام می‌شود تا ارزیابی روی داده‌های بدون اغتشاش صورت گیرد:
 
+\begin{latin}
 \begin{lstlisting}[language=Python]
 transform_val = transforms.Compose([
     transforms.Resize((200, 200)),
@@ -575,6 +577,7 @@ transform_val = transforms.Compose([
     transforms.Normalize(mean=mean, std=std)
 ])
 \end{lstlisting}
+\end{latin}
 
 \subsection{تکنیک‌های استفاده‌شده برای بهبود تعمیم}
 در معماری نهایی، سه تکنیک اصلی برای کنترل بیش‌برازش و بهبود تعمیم‌دهی پیاده‌سازی شده است:
@@ -717,14 +720,14 @@ transform_val = transforms.Compose([
 جدول زیر خلاصه‌ای از مراحل انجام‌شده و نتایج حاصل را نشان می‌دهد:
 \begin{table}[H]
 \centering
-\caption{خلاصه مراحل Fine-Tuning و نتایج}
+\caption{خلاصه مراحل \eng{Fine-Tuning} و نتایج}
 \begin{tabularx}{0.9\textwidth}{C{2.5cm}C{3cm}C{2.5cm}C{3cm}}
 \toprule
 \textbf{مرحله} & \textbf{کلاس‌های هدف} & \textbf{تعداد دوره} & \textbf{نتیجه} \\
 \midrule
 مرحله ۱ & \eng{A, M, N} & \eng{5} & بهبود تشخیص این کلاس‌ها \\
-مرحله ۲ & \eng{A, S, T} & \eng{3} & بهبود تشخیص \eng{S} و \eng{T} در Real-time \\
-مرحله ۳ & همه کلاس‌ها (وزن یکسان) & \eng{3} & تثبیت عملکرد و جلوگیری از Overfitting \\
+مرحله ۲ & \eng{A, S, T} & \eng{3} & بهبود تشخیص \eng{S} و \eng{T} در \eng{Real-time} \\
+مرحله ۳ & همه کلاس‌ها (وزن یکسان) & \eng{3} & تثبیت عملکرد و جلوگیری از \eng{Overfitting} \\
 \bottomrule
 \end{tabularx}
 \end{table}
